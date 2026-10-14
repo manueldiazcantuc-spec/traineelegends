@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cresko Smart Savings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cresko aparta un monto fijo que tú eliges en cada compra con débito y lo invierte en un fondo indexado hacia tu meta.">
+<link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: banda nocturna con la mascota como tesis, luego secciones claras en una retícula de 12 columnas; la calculadora es el momento interactivo. */
+:root {
+  --navy: #080A24;        /* noche Cresko: fondo de la mascota */
+  --navy-2: #13174A;
+  --blue: #3F58FD;        /* azul Cresko */
+  --violet: #3525F7;      /* índigo del logo */
+  --glow: #9AA8FF;
+  --paper: #F7F7FB;
+  --surface: #FFFFFF;
+  --ink: #0B0D2A;
+  --muted: #565B7E;
+  --line: #E1E3F0;
+  --accent: var(--blue);
+  --accent-soft: #E8EBFF;
+  --on-accent: #FFFFFF;
+  --good: #11865B;
+  --font-display: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1: 0.875rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.6rem; --step-3: 2.2rem; --step-4: clamp(2.6rem, 6vw, 4.6rem);
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0A0C22; --surface: #12153A; --ink: #EEF0FF; --muted: #A3A8CC; --line: #262A5C;
+    --accent: #6F82FF; --accent-soft: #1C2160; --good: #3DD69A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0A0C22; --surface: #12153A; --ink: #EEF0FF; --muted: #A3A8CC; --line: #262A5C;
+  --accent: #6F82FF; --accent-soft: #1C2160; --good: #3DD69A; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 var(--step-0)/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.08; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
+p { margin: 0; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 600 var(--step--1)/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--muted); font-size: var(--step-1); line-height: 1.5; max-width: 34em; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; border-radius: 999px; font: 600 var(--step-0)/1 var(--font-body); text-decoration: none; border: 1.5px solid transparent; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+.btn-primary { background: linear-gradient(135deg, #4A63FF, var(--violet)); color: #fff; }
+.btn-ghost { border-color: rgba(154,168,255,.45); color: #fff; }
+.btn-line { border-color: var(--line); color: var(--ink); background: var(--surface); }
+section { padding-block: clamp(56px, 9vw, 104px); }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: color-mix(in srgb, var(--navy) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(154,168,255,.12); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; font: 600 1.6rem/1 var(--font-display); letter-spacing: -0.03em; }
+.brand img { width: 34px; height: 34px; }
+.top nav { display: flex; gap: 24px; align-items: center; }
+.top nav a { color: #C9CEF5; text-decoration: none; font-size: var(--step--1); font-weight: 600; }
+.top nav a:hover { color: #fff; }
+.top nav .btn { padding: 10px 16px; font-size: var(--step--1); color: #fff; }
+@media (max-width: 760px) { .top nav a:not(.btn) { display: none; } }
+
+/* Hero */
+.hero { background: radial-gradient(120% 80% at 80% 40%, #1A1F66 0%, var(--navy) 60%); color: #fff; padding-block: clamp(40px, 7vw, 88px) 0; overflow: hidden; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; align-items: center; }
+.hero-copy { display: grid; gap: 22px; min-width: 0; padding-bottom: clamp(40px, 6vw, 80px); }
+.hero .eyebrow { color: var(--glow); }
+.hero h1 { font-size: var(--step-4); font-weight: 700; letter-spacing: -0.035em; }
+.hero h1 em { font-style: normal; background: linear-gradient(90deg, #8D9BFF, #5B6CFF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: #C9CEF5; font-size: var(--step-1); line-height: 1.5; max-width: 30em; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-note { font-size: var(--step--1); color: #8D93C4; }
+.hero-art { position: relative; min-width: 0; align-self: end; }
+.hero-art img { width: 100%; max-width: 560px; margin-left: auto; mask-image: radial-gradient(75% 75% at 55% 55%, #000 62%, transparent 100%); -webkit-mask-image: radial-gradient(75% 75% at 55% 55%, #000 62%, transparent 100%); }
+.ping { position: absolute; left: 0; top: 14%; background: rgba(19,23,74,.86); border: 1px solid rgba(154,168,255,.3); backdrop-filter: blur(8px); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; width: min(260px, 70%); box-shadow: 0 18px 40px rgba(0,0,0,.35); animation: rise .7s .3s both ease-out; }
+.ping.two { top: auto; bottom: 16%; left: 6%; animation-delay: .6s; }
+.ping small { color: #8D93C4; font-size: 0.75rem; }
+.ping b { font: 500 0.95rem/1.3 var(--font-body); color: #fff; }
+.ping .amt { font-family: var(--font-data); color: #9EF0C8; font-size: 0.9rem; }
+@keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-copy { padding-bottom: 0; } .hero-art img { margin: 0 auto; } }
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 40px; counter-reset: s; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.step::before { counter-increment: s; content: counter(s); font: 600 var(--step-2)/1 var(--font-display); color: var(--accent); }
+.step p { color: var(--muted); font-size: var(--step--1); }
+.step.final { background: linear-gradient(140deg, #4A63FF, var(--violet)); border-color: transparent; color: #fff; }
+.step.final::before, .step.final p { color: #E3E7FF; }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+.batch-note { margin-top: 20px; color: var(--muted); font-size: var(--step--1); max-width: 62em; }
+
+/* Calculadora */
+.calc { background: var(--surface); border-block: 1px solid var(--line); }
+.calc-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(24px, 5vw, 64px); align-items: start; margin-top: 32px; }
+.controls { display: grid; gap: 26px; min-width: 0; }
+.ctl { display: grid; gap: 10px; }
+.ctl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ctl label { font-weight: 600; }
+.ctl output { font: 500 var(--step-1)/1 var(--font-data); color: var(--accent); font-variant-numeric: tabular-nums; }
+.ctl small { color: var(--muted); font-size: var(--step--1); }
+input[type=range] { width: 100%; accent-color: var(--blue); height: 28px; }
+.result { background: var(--navy); color: #fff; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: grid; gap: 22px; min-width: 0; }
+.result .big { font: 700 clamp(2.6rem, 7vw, 4rem)/1 var(--font-display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.result .big span { font-size: 0.4em; color: var(--glow); font-weight: 500; letter-spacing: 0; }
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.kpi { border-top: 1px solid rgba(154,168,255,.25); padding-top: 12px; display: grid; gap: 2px; }
+.kpi small { color: #9AA0D0; font-size: 0.8rem; }
+.kpi b { font: 500 var(--step-1)/1.2 var(--font-data); font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: #1E2363; }
+.bar i { display: block; height: 100%; }
+.bar .in { background: linear-gradient(90deg, #4A63FF, #6A5BFF); }
+.bar .gr { background: #9EF0C8; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.8rem; color: #C9CEF5; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: #5B6CFF; }
+.legend span.g::before { background: #9EF0C8; }
+.fine { font-size: 0.78rem; color: #8D93C4; }
+@media (max-width: 860px) { .calc-grid { grid-template-columns: 1fr; } }
+
+/* Comparación */
+.split { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(24px, 5vw, 64px); align-items: center; }
+.split > * { min-width: 0; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: var(--step--1); }
+th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 0.78rem/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+th.us, td.us { background: var(--accent-soft); }
+td.us { font-weight: 600; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { table { min-width: 0; } th, td { padding: 12px 10px; } }
+
+/* Confianza */
+.trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin-top: 36px; }
+.trust div { background: var(--surface); padding: 26px; display: grid; gap: 8px; align-content: start; }
+.trust p { color: var(--muted); font-size: var(--step--1); }
+.trust svg { width: 26px; height: 26px; color: var(--accent); }
+@media (max-width: 860px) { .trust { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .trust { grid-template-columns: 1fr; } }
+
+/* Datos */
+.data { background: var(--navy); color: #fff; }
+.data .eyebrow { color: var(--glow); }
+.figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 36px; }
+.fig { display: grid; gap: 8px; border-top: 1px solid rgba(154,168,255,.25); padding-top: 18px; }
+.fig b { font: 700 clamp(2.6rem, 6vw, 3.6rem)/1 var(--font-display); letter-spacing: -0.03em; color: #8D9BFF; }
+.fig p { color: #C9CEF5; }
+.fig small { color: #8D93C4; font-size: 0.78rem; }
+@media (max-width: 760px) { .figs { grid-template-columns: 1fr; gap: 24px; } }
+
+/* Lista de espera */
+.wait { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 5vw, 64px); align-items: start; }
+.wait > * { min-width: 0; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: grid; gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 600; font-size: var(--step--1); }
+.field input, .field select { font: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } .wait { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .wait { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; position: relative; }
+.chips input { position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.chips label { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); cursor: pointer; font: 500 var(--step--1)/1 var(--font-data); background: var(--paper); }
+.chips input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.chips input:focus-visible + label { outline: 3px solid var(--glow); outline-offset: 2px; }
+.ok { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 12px; background: var(--accent-soft); font-weight: 600; }
+.err { color: #C3373B; font-size: var(--step--1); }
+
+/* FAQ */
+.faq { display: grid; gap: 0; margin-top: 28px; border-top: 1px solid var(--line); }
+details { border-bottom: 1px solid var(--line); padding-block: 18px; }
+summary { cursor: pointer; font: 600 var(--step-1)/1.3 var(--font-display); list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::after { content: "+"; color: var(--accent); font-weight: 400; }
+details[open] summary::after { content: "–"; }
+details p { color: var(--muted); margin-top: 10px; max-width: 62em; }
+
+footer { background: var(--navy); color: #8D93C4; font-size: var(--step--1); padding-block: 40px; }
+footer .wrap { display: grid; gap: 18px; }
+footer .brand { font-size: 1.3rem; }
+footer p { max-width: 70em; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Cresko, inicio"><img src="assets/logo-mark.svg" alt="">cresko</a>
+    <nav aria-label="Principal">
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#calculadora">Calculadora</a>
+      <a href="#confianza">Seguridad</a>
+      <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">Ahorro e inversión automática</span>
+        <h1 id="h-hero">Cada vez que pagas, <em>creces.</em></h1>
+        <p>Cresko aparta un monto fijo que tú eliges en cada compra con tu tarjeta de débito y lo invierte en un fondo indexado hacia tu meta. Sigues usando tu banco y tu tarjeta de siempre.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
+          <a class="btn btn-ghost" href="#lista">Unirme a la lista de espera</a>
+        </div>
+        <span class="hero-note">Prototipo en validación · México, 2026</span>
+      </div>
+      <div class="hero-art">
+        <img src="assets/mascota.jpg" alt="La mascota de Cresko: una alcancía con cuernos de toro junto a pilas de monedas y una flecha que sube" width="736" height="680">
+        <div class="ping" aria-hidden="true">
+          <small>Débito ···· 4821 · OXXO</small>
+          <b>Compra de $87.50</b>
+          <span class="amt">+$5.00 a Viaje a Oaxaca</span>
+        </div>
+        <div class="ping two" aria-hidden="true">
+          <small>Meta · Fondo de emergencia</small>
+          <b>Llevas 38% de $15,000</b>
+          <span class="amt">+$1,860 este trimestre</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-funciona" aria-labelledby="h-how">
+    <div class="wrap">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2 id="h-how" style="margin-top:12px">Ahorras sin decidir cada día</h2>
+      <div class="steps">
+        <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo apartar.</p></div>
+        <div class="step"><h3>Elige tu monto por compra</h3><p>De $2 a $20, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
+        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra suma tu monto al ahorro del día.</p></div>
+        <div class="step final"><h3>Se invierte hacia tu meta</h3><p>Un fondo indexado de bajo costo. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
+      </div>
+      <p class="batch-note">Juntamos los montos del día y hacemos un solo cargo a tu débito por la noche. Así una compra no se vuelve diez cargos chiquitos en tu estado de cuenta.</p>
+    </div>
+  </section>
+
+  <section id="calculadora" class="calc" aria-labelledby="h-calc">
+    <div class="wrap">
+      <span class="eyebrow">Calculadora</span>
+      <h2 id="h-calc" style="margin-top:12px">¿Cuánto juntarías sin notarlo?</h2>
+      <div class="calc-grid">
+        <div class="controls">
+          <div class="ctl">
+            <div class="ctl-head"><label for="fee">Monto por compra</label><output id="fee-out" for="fee">$5</output></div>
+            <input id="fee" type="range" min="2" max="20" step="1" value="5">
+            <small>Lo que se aparta cada vez que pagas con débito.</small>
+          </div>
+          <div class="ctl">
+            <div class="ctl-head"><label for="buys">Compras con débito al mes</label><output id="buys-out" for="buys">30</output></div>
+            <input id="buys" type="range" min="5" max="90" step="1" value="30">
+            <small>Una al día es lo típico para alguien que paga casi todo con tarjeta.</small>
+          </div>
+          <div class="ctl">
+            <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">5 años</output></div>
+            <input id="years" type="range" min="1" max="15" step="1" value="5">
+          </div>
+        </div>
+        <div class="result" aria-live="polite">
+          <div>
+            <small style="color:#9AA0D0">Al mes apartas</small>
+            <div class="big" id="r-month">$150 <span>MXN</span></div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><small>En un año</small><b id="r-year">$1,800</b></div>
+            <div class="kpi"><small id="r-label">En 5 años, con rendimiento</small><b id="r-fv">$10,900</b></div>
+          </div>
+          <div class="bar" role="img" id="r-bar" aria-label="Proporción entre lo aportado y el rendimiento"><i class="in" id="b-in" style="width:80%"></i><i class="gr" id="b-gr" style="width:20%"></i></div>
+          <div class="legend"><span id="l-in">Aportado $9,000</span><span class="g" id="l-gr">Rendimiento $1,900</span></div>
+          <p class="fine">Ejemplo hipotético con 8% anual compuesto cada mes, antes de comisiones e impuestos. Un fondo indexado puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-vs">
+    <div class="wrap split">
+      <div style="display:grid;gap:16px">
+        <span class="eyebrow">Monto fijo, no redondeo</span>
+        <h2 id="h-vs">Sabes exactamente cuánto apartas</h2>
+        <p class="lede">Las apps de redondeo apartan lo que falta para el siguiente peso cerrado, y eso cambia en cada compra. En Cresko eliges un monto que no se mueve y un tope que no se rebasa.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col"></th><th scope="col">Redondeo</th><th scope="col" class="us">Cresko</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Compra de $87.50</th><td>Aparta $2.50</td><td class="us">Aparta tu monto: $5</td></tr>
+            <tr><th scope="row">Compra de $120.00</th><td>Aparta $0</td><td class="us">Aparta $5</td></tr>
+            <tr><th scope="row">Al mes</th><td>Difícil de predecir</td><td class="us">Monto × compras, con tope</td></tr>
+            <tr><th scope="row">Destino</th><td>Casi siempre un depósito</td><td class="us">Fondo indexado hacia tu meta</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="confianza" class="calc" aria-labelledby="h-trust">
+    <div class="wrap">
+      <span class="eyebrow">Tú tienes el control</span>
+      <h2 id="h-trust" style="margin-top:12px">Reglas claras desde el primer día</h2>
+      <div class="trust">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
+          <h3>Aceptas el monto expresamente</h3><p>Nada se aparta sin que confirmes el monto, el tope y la tarjeta.</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18h16M7 14V9m5 5V6m5 8v-3"/></svg>
+          <h3>Tope mensual</h3><p>Al llegar a tu tope, Cresko deja de apartar hasta el siguiente mes.</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+          <h3>Pausa o cancela al instante</h3><p>Un botón pausa los apartados. Otro desvincula la tarjeta.</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg>
+          <h3>Solo leemos tus compras</h3><p>Vemos monto, comercio y fecha. Nunca tu NIP ni tu saldo completo.</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>
+          <h3>Fondo indexado de bajo costo</h3><p>Diversificado y con comisión baja, según tu perfil de riesgo.</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+          <h3>Con una institución regulada</h3><p>La inversión operará con una distribuidora o asesor registrado ante la CNBV. Alianza en proceso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="data" aria-labelledby="h-data">
+    <div class="wrap">
+      <span class="eyebrow">Por qué ahora</span>
+      <h2 id="h-data" style="margin-top:12px">En México ya pagamos con débito. Falta que ese hábito construya patrimonio.</h2>
+      <div class="figs">
+        <div class="fig"><b>71%</b><p>de las compras con tarjeta se hacen con débito.</p><small>Banxico, noviembre 2024</small></div>
+        <div class="fig"><b>8%</b><p>de los adultos ahorra solo en instrumentos formales.</p><small>ENIF 2024, INEGI y CNBV</small></div>
+        <div class="fig"><b>197 M</b><p>tarjetas de débito vigentes, frente a 39 M de crédito.</p><small>Banxico, 1T 2024</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lista" aria-labelledby="h-wait">
+    <div class="wrap wait">
+      <div style="display:grid;gap:16px">
+        <span class="eyebrow">Lista de espera</span>
+        <h2 id="h-wait">Sé de las primeras personas en probarlo</h2>
+        <p class="lede">Estamos armando el piloto con personas de 18 a 35 años que pagan con débito. Cuéntanos qué monto te sentiría cómodo; con eso definimos el precio.</p>
+      </div>
+      <form id="wait-form" novalidate>
+        <div class="row2">
+          <div class="field"><label for="w-name">Nombre</label><input id="w-name" name="name" autocomplete="given-name" required></div>
+          <div class="field"><label for="w-age">Edad</label>
+            <select id="w-age" name="age"><option>18 a 24</option><option selected>25 a 35</option><option>36 a 50</option><option>Más de 50</option></select></div>
+        </div>
+        <div class="field"><label for="w-email">Correo</label><input id="w-email" name="email" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="w-bank">Banco de tu débito principal</label>
+          <select id="w-bank" name="bank"><option>BBVA</option><option>Banorte</option><option>Santander</option><option>Banamex</option><option>Nu</option><option>Mercado Pago</option><option>HSBC</option><option>Otro</option></select></div>
+        <fieldset class="field" style="border:0;padding:0;margin:0">
+          <legend style="font-weight:600;font-size:var(--step--1);margin-bottom:6px">¿Cuánto apartarías por compra?</legend>
+          <div class="chips">
+            <input type="radio" name="fee" id="f2" value="2"><label for="f2">$2</label>
+            <input type="radio" name="fee" id="f5" value="5" checked><label for="f5">$5</label>
+            <input type="radio" name="fee" id="f10" value="10"><label for="f10">$10</label>
+            <input type="radio" name="fee" id="f20" value="20"><label for="f20">$20</label>
+          </div>
+        </fieldset>
+        <p class="err" id="w-err" hidden></p>
+        <button class="btn btn-primary" type="submit" style="justify-content:center">Unirme a la lista</button>
+        <div class="ok" id="w-ok" hidden><span>Listo, te anotamos. Te escribiremos cuando abra el piloto.</span></div>
+        <small style="color:var(--muted)">Prototipo: tus datos se guardan solo en este navegador.</small>
+      </form>
+    </div>
+  </section>
+
+  <section class="calc" aria-labelledby="h-faq">
+    <div class="wrap">
+      <span class="eyebrow">Preguntas frecuentes</span>
+      <h2 id="h-faq" style="margin-top:12px">Lo que nos preguntan</h2>
+      <div class="faq">
+        <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Cresko lee tus compras y hace un cargo diario con la suma de tus montos.</p></details>
+        <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges $5 por compra y un tope de $300, nunca apartarás más de $300 en el mes, aunque hagas 100 compras.</p></details>
+        <details><summary>¿Puedo sacar mi dinero?</summary><p>Sí. Puedes retirar tu inversión a tu cuenta cuando quieras. El fondo puede valer más o menos que lo que aportaste, según el mercado.</p></details>
+        <details><summary>¿Cuánto cuesta?</summary><p>Estamos validando el precio en el piloto: una suscripción mensual baja o un porcentaje anual sobre lo invertido. Te lo diremos antes de que actives nada.</p></details>
+        <details><summary>¿Es seguro vincular mi tarjeta?</summary><p>La conexión se hace con un proveedor especializado y tu consentimiento. Cresko nunca ve tu NIP ni tu contraseña bancaria, y puedes desvincular la tarjeta en cualquier momento.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#inicio"><img src="assets/logo-mark.svg" alt="" style="width:26px;height:26px">cresko</a>
+    <p>Cresko Smart Savings es un prototipo en validación. Las cifras de la calculadora son hipotéticas y no constituyen asesoría de inversión. La operación de inversión dependerá de una alianza con una entidad autorizada por la CNBV.</p>
+    <p>Datos: ENIF 2024 (INEGI y CNBV); Banxico vía Expansión y Plaza de Armas.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var mxn = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
+  var $ = function (id) { return document.getElementById(id); };
+  var RATE = 0.08;
+
+  function calc() {
+    var fee = +$("fee").value, buys = +$("buys").value, years = +$("years").value;
+    var month = fee * buys, n = years * 12, i = RATE / 12;
+    var fv = month * ((Math.pow(1 + i, n) - 1) / i);
+    var paid = month * n, growth = fv - paid;
+    $("fee-out").textContent = "$" + fee;
+    $("buys-out").textContent = buys;
+    $("years-out").textContent = years + (years === 1 ? " año" : " años");
+    $("r-month").firstChild.nodeValue = mxn.format(month) + " ";
+    $("r-year").textContent = mxn.format(month * 12);
+    $("r-label").textContent = "En " + years + (years === 1 ? " año" : " años") + ", con rendimiento";
+    $("r-fv").textContent = mxn.format(fv);
+    var pin = paid / fv * 100;
+    $("b-in").style.width = pin + "%";
+    $("b-gr").style.width = (100 - pin) + "%";
+    $("l-in").textContent = "Aportado " + mxn.format(paid);
+    $("l-gr").textContent = "Rendimiento " + mxn.format(growth);
+  }
+  ["fee", "buys", "years"].forEach(function (id) { $(id).addEventListener("input", calc); });
+  calc();
+
+  var KEY = "cresko.waitlist";
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
+  $("wait-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = e.target, err = $("w-err");
+    var name = f.name.value.trim(), email = f.email.value.trim();
+    if (!name) { err.textContent = "Escribe tu nombre para anotarte."; err.hidden = false; f.name.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Revisa tu correo; parece incompleto."; err.hidden = false; f.email.focus(); return; }
+    err.hidden = true;
+    var list = load();
+    list.push({ name: name, email: email, age: f.age.value, bank: f.bank.value, fee: +f.fee.value, at: new Date().toISOString() });
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e2) {}
+    $("w-ok").hidden = false;
+    f.querySelector("button[type=submit]").hidden = true;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cresko MVP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" href="../assets/logo-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="page">
+  <div class="bar-top">
+    <a class="brand" href="../index.html"><img src="../assets/logo-mark.svg" alt="">cresko<small>MVP · Propuesta 3</small></a>
+    <a class="back" href="../index.html">← Volver al sitio</a>
+  </div>
+
+  <div class="stage">
+    <div class="phone" id="phone" aria-label="App de Cresko">
+      <div class="status"><span id="st-time">9:41</span><span>Cresko</span></div>
+      <div class="screen" id="screen"></div>
+      <nav class="tabs" id="tabs" aria-label="Secciones" hidden></nav>
+      <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+
+    <aside class="panel" aria-label="Panel del piloto">
+      <div class="panel-card">
+        <span class="eyebrow">Simulador del piloto</span>
+        <h2>Prueba el flujo completo sin tarjeta real</h2>
+        <p>Cada botón imita lo que hará el banco o el procesador de pagos. La bitácora de abajo muestra los eventos que recibirá el backend en la prueba con tarjeta real.</p>
+        <div class="clock"><span class="muted small">Fecha simulada</span><b id="clock">—</b></div>
+        <div class="controls">
+          <button class="btn btn-primary btn-sm" id="c-buy">Simular compra</button>
+          <button class="btn btn-line btn-sm" id="c-day">Avanzar 1 día</button>
+          <button class="btn btn-line btn-sm" id="c-week">Avanzar 1 semana</button>
+        </div>
+        <div class="custom-buy">
+          <div class="field"><label for="c-merchant">Comercio</label><input id="c-merchant" value="Tacos El Güero"></div>
+          <div class="field"><label for="c-amount">Monto</label><input id="c-amount" type="number" min="1" step="0.5" value="65" inputmode="decimal"></div>
+          <button class="btn btn-line btn-sm" id="c-custom">Registrar</button>
+        </div>
+        <div class="controls">
+          <button class="btn btn-line btn-sm" id="c-demo">Cargar 6 semanas de ejemplo</button>
+          <button class="btn btn-danger btn-sm" id="c-reset">Reiniciar</button>
+        </div>
+        <p class="small" id="c-hint" hidden>Termina el registro en el teléfono (o carga el ejemplo) para que las compras generen apartados.</p>
+      </div>
+
+      <div class="panel-card">
+        <span class="eyebrow">Bitácora del backend</span>
+        <div class="log" id="log" aria-live="polite"></div>
+      </div>
+
+      <div class="panel-card">
+        <span class="eyebrow">Qué pasa en cada compra</span>
+        <div class="flow">
+          <div><b>El banco avisa</b>El agregador manda un webhook con monto, comercio y fecha.</div>
+          <div><b>El motor decide</b>Aplica tu monto, el mínimo de compra y el tope mensual.</div>
+          <div><b>Un cargo al día</b>A las 23:00 se cobra la suma del día a tu débito.</div>
+          <div><b>Se invierte</b>El cargo compra unidades del fondo al precio del día.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="provider.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
