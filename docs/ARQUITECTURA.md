@@ -15,11 +15,11 @@ Este documento explica cómo pasar del MVP simulado a una prueba con una tarjeta
 ## Flujo de una compra
 
 1. **El banco avisa.** El agregador envía un webhook `transaction.created` con monto, comercio y fecha.
-2. **El motor decide.** `evaluatePurchase()` aplica el monto fijo, la compra mínima, la pausa y el tope mensual.
+2. **El motor decide.** `evaluatePurchase()` calcula el porcentaje de la compra (`feeFor()`) y aplica la compra mínima, la pausa y el tope mensual.
 3. **Un cargo al día.** A las 23:00 `settle()` suma los pendientes y hace **un solo cargo** a la tarjeta tokenizada.
 4. **Se invierte.** El cargo aprobado compra unidades del fondo al precio del día. Un cargo rechazado no invierte y se avisa al usuario.
 
-El cargo agrupado no es opcional: cobrar $5 por separado en cada compra costaría más en comisiones del procesador
+El cargo agrupado no es opcional: cobrar por separado el 3% de cada compra (unos $2 a $6 en compras típicas) costaría más en comisiones del procesador
 (típicamente un porcentaje más una cuota fija por transacción) que el propio apartado.
 
 ## La interfaz que hay que implementar
@@ -59,5 +59,5 @@ Nada de esto sustituye la revisión de un despacho regulatorio.
 1. Backend mínimo (por ejemplo Node + Postgres) que exponga `POST /webhooks/transacciones` y un job diario de cierre.
 2. Mover `engine.js` al backend y conservar `tests/engine.test.js`.
 3. Implementar `EmailAlertProvider` (ruta 1) para la prueba interna.
-4. Tokenizar una tarjeta real en modo prueba del procesador y luego en producción con montos de $2.
+4. Tokenizar una tarjeta real en modo prueba del procesador y luego en producción con el 1% de compras chicas.
 5. Cambiar `MockCardProvider` por un cliente HTTP del backend en `app/app.js`.

@@ -1,6 +1,6 @@
 # Cresko · Smart Savings
 
-Prototipo de ahorro e inversión automática ligada al consumo: en cada compra con débito se aparta un monto fijo
+Prototipo de ahorro e inversión automática ligada al consumo: en cada compra con débito se aparta un porcentaje
 que el usuario elige y se invierte en un fondo indexado hacia su meta. Este repositorio sigue la
 **propuesta 3: vincular la tarjeta de débito que el usuario ya tiene**.
 
@@ -8,7 +8,7 @@ que el usuario elige y se invierte en un fondo indexado hacia su meta. Este repo
 
 - `index.html`: sitio web (propuesta de valor, calculadora, confianza, lista de espera con prueba de precio).
 - `app/`: MVP en un teléfono simulado, con un panel del piloto y una bitácora del backend.
-  - `engine.js`: motor de reglas (monto por compra, mínimo, tope mensual, pausa, cargo diario agrupado, unidades del fondo).
+  - `engine.js`: motor de reglas (porcentaje por compra, mínimo, tope mensual, pausa, cargo diario agrupado, unidades del fondo).
   - `provider.js`: proveedor de tarjeta simulado. Es la pieza que se reemplaza para la prueba real.
   - `app.js`, `app.css`: pantallas y estilos.
 - `docs/ARQUITECTURA.md`: cómo pasar a una prueba con tarjeta real.

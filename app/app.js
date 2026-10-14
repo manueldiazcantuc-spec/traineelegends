@@ -9,7 +9,8 @@
 
   var E = window.CreskoEngine;
   var KEY = "cresko.mvp.v1";
-  var BUYS_PER_MONTH = 30;      // supuesto de la propuesta: una compra con débito al día
+  var SPENDS = [3000, 6000, 10000, 15000]; // gasto mensual con débito para proyectar
+  var PCTS = [1, 2, 3, 5, 10];
   var EXPECTED_RATE = 0.08;     // rendimiento anual hipotético para proyecciones
   var CHARGE_HOUR = 23;
 
@@ -41,6 +42,7 @@
   var fTime = new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" });
   function m2(n) { return fmt2.format(n); }
   function m0(n) { return fmt0.format(n); }
+  function pc(n) { return n + "%"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function months(n) {
     if (!isFinite(n)) return "sin fecha";
@@ -55,14 +57,14 @@
   function fresh() {
     var c = startClock();
     return {
-      v: 1, stage: "welcome", tab: "inicio", userName: "",
-      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, fee: 5, cap: 300, minPurchase: 20, bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
+      v: 2, stage: "welcome", tab: "inicio", userName: "", spend: 6000,
+      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, pct: 3, spend: 6000, cap: 300, minPurchase: 20, bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
       linkStep: -1, goal: null, rules: Object.assign({}, E.DEFAULT_RULES), card: null, consent: null,
       txs: [], charges: [], units: 0, contributed: 0, nav: 100, navHistory: [{ d: c, nav: 100 }],
       clock: c, logs: [], confirmUnlink: false, isExample: false
     };
   }
-  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
+  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 2 ? s : null; } catch (e) { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
   var state = load() || fresh();
@@ -128,7 +130,8 @@
     state.navHistory = [{ d: state.clock, nav: 100 }];
     state.userName = "Ana";
     state.goal = { kind: "viaje", name: "Viaje a Oaxaca", target: 15000 };
-    state.rules = { fee: 5, cap: 300, minPurchase: 20, paused: false };
+    state.rules = { pct: 3, cap: 300, minPurchase: 20, paused: false };
+    state.spend = 6000;
     state.card = { cardId: "card_demo", bank: "BBVA", last4: "4821", holder: "Ana López", status: "activa", linkedAt: state.clock };
     state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
     state.stage = "app"; state.isExample = true;
@@ -143,9 +146,9 @@
   /* ---------- Derivados ---------- */
 
   function value() { return E.portfolioValue(state, state.nav); }
-  function expectedMonthly(rules) { return E.monthlyContribution(rules, BUYS_PER_MONTH); }
+  function expectedMonthly(rules, spend) { return E.monthlyContribution(rules, spend == null ? state.spend : spend); }
   function consentText(r, card) {
-    return "Acepto que Cresko cargue a mi tarjeta ···· " + card.last4 + " " + m0(r.fee) + " por cada compra" +
+    return "Acepto que Cresko cargue a mi tarjeta ···· " + card.last4 + " el " + pc(r.pct) + " de cada compra" +
       (r.minPurchase ? " de " + m0(r.minPurchase) + " o más" : "") + ", hasta " + m0(r.cap) + " al mes, en un solo cargo diario, y lo invierta en un fondo indexado. Puedo pausar o cancelar en cualquier momento.";
   }
 
@@ -169,9 +172,9 @@
   var screens = {
     welcome: function () {
       return '<div class="welcome">' +
-        '<img src="../assets/mascota.jpg" alt="Mascota de Cresko">' +
+        '<img src="../assets/mascota.webp" alt="Mascota de Cresko">' +
         '<h1>Cada vez que pagas, creces.</h1>' +
-        '<p>Apartamos un monto fijo en cada compra con tu débito y lo invertimos hacia tu meta.</p>' +
+        '<p>Apartamos un porcentaje de cada compra con tu débito y lo invertimos hacia tu meta.</p>' +
         '<div class="spacer"></div>' +
         '<div class="stack"><button class="btn btn-primary block" data-act="go" data-to="goal">Crear mi cuenta</button>' +
         '<button class="btn btn-line block" data-act="example">Ver con datos de ejemplo</button></div></div>';
@@ -193,8 +196,8 @@
 
     rules: function () {
       var d = state.draft;
-      var r = { fee: d.fee, cap: d.cap };
-      var mo = expectedMonthly(r);
+      var r = { pct: d.pct, cap: d.cap };
+      var mo = expectedMonthly(r, d.spend);
       var n = E.monthsToGoal(0, mo, d.target, EXPECTED_RATE);
       function chips(field, vals, fmt) {
         return '<div class="chips" role="group">' + vals.map(function (v) {
@@ -202,12 +205,14 @@
         }).join("") + "</div>";
       }
       return header(2, "goal") +
-        '<div class="stack"><span class="eyebrow">Tu monto</span><h2>¿Cuánto apartamos en cada compra?</h2><p class="muted small">Es fijo: no cambia con lo que gastes. Lo puedes ajustar cuando quieras.</p></div>' +
-        '<div class="field"><span class="lbl">Por compra</span>' + chips("fee", [2, 5, 10, 15, 20], m0) + "</div>" +
+        '<div class="stack"><span class="eyebrow">Tu porcentaje</span><h2>¿Qué porcentaje apartamos de cada compra?</h2><p class="muted small">Ahorras en proporción a lo que gastas. Lo puedes ajustar cuando quieras.</p></div>' +
+        '<div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + '<small class="muted">Con ' + pc(d.pct) + ", una compra de $200 aparta " + m2(E.feeFor({ pct: d.pct }, 200)) + ".</small></div>" +
         '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + '<small class="muted">Al llegar al tope dejamos de apartar hasta el siguiente mes.</small></div>' +
         '<div class="field"><label for="i-min">No apartar en compras menores a</label><select id="i-min" data-bind="draft.minPurchase" data-num="1">' +
           [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (d.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
-        '<div class="projection"><small>Con ~' + BUYS_PER_MONTH + ' compras al mes apartarías</small><b>' + m0(mo) + ' al mes</b>' +
+        '<div class="field"><label for="i-spend">¿Cuánto gastas al mes con tu débito?</label><select id="i-spend" data-bind="draft.spend" data-num="1">' +
+          SPENDS.map(function (v) { return '<option value="' + v + '"' + (d.spend === v ? " selected" : "") + ">Unos " + m0(v) + "</option>"; }).join("") + "</select></div>" +
+        '<div class="projection"><small>Gastando ' + m0(d.spend) + ' al mes apartarías</small><b>' + m0(mo) + ' al mes</b>' +
           '<small>Llegarías a ' + m0(d.target) + ' en <span class="num">' + months(n) + "</span>*</small></div>" +
         '<p class="muted small">*Hipotético, con 8% anual. El fondo puede subir o bajar.</p>' +
         '<button class="btn btn-primary block" data-act="go" data-to="card">Continuar</button>';
@@ -240,13 +245,13 @@
 
     confirm: function () {
       var d = state.draft;
-      var r = { fee: d.fee, cap: d.cap, minPurchase: d.minPurchase };
+      var r = { pct: d.pct, cap: d.cap, minPurchase: d.minPurchase };
       return header(4, "card") +
         '<div class="stack"><span class="eyebrow">Último paso</span><h2>Confirma tus reglas</h2></div>' +
         '<dl class="card summary">' +
           "<div><dt>Meta</dt><dd>" + esc(d.goalName) + " · " + m0(d.target) + "</dd></div>" +
           "<div><dt>Tarjeta</dt><dd>" + esc(d.bank) + " ···· " + esc(d.last4) + "</dd></div>" +
-          "<div><dt>Por compra</dt><dd>" + m0(d.fee) + "</dd></div>" +
+          "<div><dt>De cada compra</dt><dd>" + pc(d.pct) + "</dd></div>" +
           "<div><dt>Tope mensual</dt><dd>" + m0(d.cap) + "</dd></div>" +
           "<div><dt>Compras mínimas</dt><dd>" + (d.minPurchase ? m0(d.minPurchase) : "Todas") + "</dd></div>" +
           "<div><dt>Cobro</dt><dd>Un cargo al día, 23:00</dd></div>" +
@@ -303,14 +308,14 @@
 
     ajustes: function () {
       var r = state.rules;
-      function chips(field, vals) {
-        return '<div class="chips">' + vals.map(function (v) { return '<button class="chip" data-act="rule" data-field="' + field + '" data-val="' + v + '" aria-pressed="' + (r[field] === v) + '">' + m0(v) + "</button>"; }).join("") + "</div>";
+      function chips(field, vals, fmt) {
+        return '<div class="chips">' + vals.map(function (v) { return '<button class="chip" data-act="rule" data-field="' + field + '" data-val="' + v + '" aria-pressed="' + (r[field] === v) + '">' + fmt(v) + "</button>"; }).join("") + "</div>";
       }
       var linked = state.card.status === "activa";
       return "<h2>Ajustes</h2>" +
-        '<div class="card toggle"><div><b>Apartados activos</b><br><span class="muted small">' + (r.paused ? "En pausa: tus compras no generan apartados." : "Cada compra aparta " + m0(r.fee) + ".") + '</span></div><button class="switch" role="switch" aria-label="Apartados activos" aria-checked="' + !r.paused + '" data-act="pause"' + (linked ? "" : " disabled") + "></button></div>" +
-        '<div class="card stack"><div class="field"><span class="lbl">Por compra</span>' + chips("fee", [2, 5, 10, 15, 20]) + "</div>" +
-          '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000]) + "</div>" +
+        '<div class="card toggle"><div><b>Apartados activos</b><br><span class="muted small">' + (r.paused ? "En pausa: tus compras no generan apartados." : "Cada compra aparta el " + pc(r.pct) + ".") + '</span></div><button class="switch" role="switch" aria-label="Apartados activos" aria-checked="' + !r.paused + '" data-act="pause"' + (linked ? "" : " disabled") + "></button></div>" +
+        '<div class="card stack"><div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + "</div>" +
+          '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + "</div>" +
           '<div class="field"><label for="i-rmin">No apartar en compras menores a</label><select id="i-rmin" data-act-change="rule-min">' + [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (r.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
           '<p class="muted small">Los cambios aplican desde tu siguiente compra.</p></div>' +
         '<div class="card stack"><b>Tarjeta</b><span class="muted small">' + esc(state.card.bank) + " ···· " + esc(state.card.last4) + " · " + esc(state.card.holder) + "</span>" +
@@ -400,7 +405,7 @@
   });
   $screen.addEventListener("change", function (e) {
     var el = e.target;
-    if (el.getAttribute("data-bind") === "draft.minPurchase") { state.draft.minPurchase = +el.value; render(); }
+    if (el.getAttribute("data-bind") === "draft.minPurchase" || el.getAttribute("data-bind") === "draft.spend") { setPath(el.getAttribute("data-bind"), +el.value); render(); }
     if (el.getAttribute("data-act-change") === "rule-min") { state.rules.minPurchase = +el.value; log("evento", "reglas actualizadas", { minimo: m0(+el.value) }); toast("Listo: compras menores a " + m0(+el.value) + " ya no apartan."); render(); }
   });
 
@@ -428,8 +433,8 @@
         var f = b.getAttribute("data-field"), val = +b.getAttribute("data-val");
         state.rules[f] = val;
         state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
-        log("evento", "reglas actualizadas y nueva autorización registrada", (function () { var o = {}; o[f === "fee" ? "por_compra" : "tope"] = m0(val); return o; })());
-        toast(f === "fee" ? "Ahora apartamos " + m0(val) + " por compra." : "Tu tope mensual es " + m0(val) + ".");
+        log("evento", "reglas actualizadas y nueva autorización registrada", (function () { var o = {}; o[f === "pct" ? "porcentaje" : "tope"] = f === "pct" ? pc(val) : m0(val); return o; })());
+        toast(f === "pct" ? "Ahora apartamos el " + pc(val) + " de cada compra." : "Tu tope mensual es " + m0(val) + ".");
         break;
       case "unlink-ask": state.confirmUnlink = true; break;
       case "unlink-cancel": state.confirmUnlink = false; break;
@@ -438,7 +443,7 @@
         state.card.status = "desvinculada"; state.confirmUnlink = false;
         toast("Desvinculamos tu tarjeta. No habrá más cargos."); break;
       case "relink":
-        Object.assign(d, { last4: "", holder: state.card.holder, readConsent: false, feeConsent: false, goalName: state.goal.name, target: state.goal.target, fee: state.rules.fee, cap: state.rules.cap, minPurchase: state.rules.minPurchase });
+        Object.assign(d, { last4: "", holder: state.card.holder, readConsent: false, feeConsent: false, goalName: state.goal.name, target: state.goal.target, pct: state.rules.pct, spend: state.spend, cap: state.rules.cap, minPurchase: state.rules.minPurchase });
         state.stage = "card"; break;
     }
     render();
@@ -460,12 +465,13 @@
   function activate() {
     var d = state.draft, c = state.pendingCard;
     state.goal = { kind: d.goalKind, name: d.goalName.trim(), target: d.target };
-    state.rules = { fee: d.fee, cap: d.cap, minPurchase: d.minPurchase, paused: false };
+    state.rules = { pct: d.pct, cap: d.cap, minPurchase: d.minPurchase, paused: false };
+    state.spend = d.spend;
     state.card = { cardId: c.cardId, bank: c.bank, last4: c.last4, holder: c.holder, status: "activa", linkedAt: state.clock };
     state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
     state.stage = "app"; state.tab = "inicio"; state.isExample = false;
     delete state.pendingCard;
-    log("evento", "consent.accepted", { por_compra: m0(d.fee), tope: m0(d.cap), minimo: m0(d.minPurchase) });
+    log("evento", "consent.accepted", { porcentaje: pc(d.pct), tope: m0(d.cap), minimo: m0(d.minPurchase) });
     toast("Listo, " + (state.userName.trim() || "") + ". Tu próxima compra ya suma a tu meta.");
   }
 

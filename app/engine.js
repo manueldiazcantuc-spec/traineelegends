@@ -1,7 +1,7 @@
 /*
  * Cresko · motor de reglas
  *
- * Lógica pura, sin DOM ni red. Decide cuánto se aparta en cada compra,
+ * Lógica pura, sin DOM ni red. Aparta un porcentaje de cada compra,
  * agrupa los apartados del día en un solo cargo y convierte ese cargo en
  * unidades del fondo. Es la misma lógica que correrá en el backend cuando
  * conectemos una tarjeta real, por eso no depende del navegador.
@@ -10,7 +10,7 @@
   "use strict";
 
   var DEFAULT_RULES = {
-    fee: 5,          // MXN que se apartan por compra
+    pct: 3,          // % de cada compra que se aparta
     cap: 300,        // tope mensual en MXN
     minPurchase: 20, // compras menores no generan apartado
     paused: false
@@ -31,6 +31,9 @@
     }, 0));
   }
 
+  /** Apartado de una compra: su porcentaje, redondeado a centavos. */
+  function feeFor(rules, amount) { return round2(amount * rules.pct / 100); }
+
   /**
    * Decide el apartado de una compra.
    * Devuelve { fee, status: "pendiente" | "omitido", reason }.
@@ -42,8 +45,9 @@
     if (tx.amount < r.minPurchase) return { fee: 0, status: "omitido", reason: "Menor a $" + r.minPurchase };
     var room = round2(r.cap - monthTotal(state, tx.date));
     if (room <= 0) return { fee: 0, status: "omitido", reason: "Tope mensual alcanzado" };
-    if (room < r.fee) return { fee: room, status: "pendiente", reason: "Ajustado al tope mensual" };
-    return { fee: r.fee, status: "pendiente", reason: "" };
+    var fee = feeFor(r, tx.amount);
+    if (room < fee) return { fee: room, status: "pendiente", reason: "Ajustado al tope mensual" };
+    return { fee: fee, status: "pendiente", reason: "" };
   }
 
   /** Registra una compra en el estado y devuelve el movimiento creado. */
@@ -84,9 +88,9 @@
 
   function portfolioValue(state, nav) { return round2(state.units * nav); }
 
-  /** Aportación mensual esperada, respetando el tope. */
-  function monthlyContribution(rules, purchasesPerMonth) {
-    return Math.min(rules.fee * purchasesPerMonth, rules.cap);
+  /** Aportación mensual esperada para un gasto mensual con débito, respetando el tope. */
+  function monthlyContribution(rules, monthlySpend) {
+    return Math.min(round2(monthlySpend * rules.pct / 100), rules.cap);
   }
 
   /** Meses para llegar a `goal` desde `current`, aportando `monthly` con tasa anual `rate`. */
@@ -118,7 +122,7 @@
 
   var api = {
     DEFAULT_RULES: DEFAULT_RULES, round2: round2, dayKey: dayKey, monthKey: monthKey,
-    monthTotal: monthTotal, evaluatePurchase: evaluatePurchase, applyPurchase: applyPurchase,
+    monthTotal: monthTotal, feeFor: feeFor, evaluatePurchase: evaluatePurchase, applyPurchase: applyPurchase,
     pending: pending, pendingTotal: pendingTotal, settle: settle, portfolioValue: portfolioValue,
     monthlyContribution: monthlyContribution, monthsToGoal: monthsToGoal, rng: rng, nextNav: nextNav
   };

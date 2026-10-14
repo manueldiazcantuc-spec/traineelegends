@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cresko Smart Savings</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Cresko aparta un monto fijo que tú eliges en cada compra con débito y lo invierte en un fondo indexado hacia tu meta.">
+<meta name="description" content="Cresko aparta un porcentaje que tú eliges de cada compra con débito y lo invierte en un fondo indexado hacia tu meta.">
 <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,14 +87,15 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero-note { font-size: var(--step--1); color: #8D93C4; }
 .hero-art { position: relative; min-width: 0; align-self: end; }
-.hero-art img { width: 100%; max-width: 560px; margin-left: auto; mask-image: radial-gradient(75% 75% at 55% 55%, #000 62%, transparent 100%); -webkit-mask-image: radial-gradient(75% 75% at 55% 55%, #000 62%, transparent 100%); }
-.ping { position: absolute; left: 0; top: 14%; background: rgba(19,23,74,.86); border: 1px solid rgba(154,168,255,.3); backdrop-filter: blur(8px); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; width: min(260px, 70%); box-shadow: 0 18px 40px rgba(0,0,0,.35); animation: rise .7s .3s both ease-out; }
-.ping.two { top: auto; bottom: 16%; left: 6%; animation-delay: .6s; }
+.hero-art { padding-block: 24px 56px; }
+.hero-art img { width: 100%; max-width: 500px; height: auto; margin-left: auto; filter: drop-shadow(0 30px 60px rgba(63,88,253,.45)); }
+.ping { position: absolute; left: 0; top: 2%; background: rgba(19,23,74,.86); border: 1px solid rgba(154,168,255,.3); backdrop-filter: blur(8px); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; width: min(260px, 70%); box-shadow: 0 18px 40px rgba(0,0,0,.35); animation: rise .7s .3s both ease-out; }
+.ping.two { top: auto; bottom: 10%; left: auto; right: 0; animation-delay: .6s; }
 .ping small { color: #8D93C4; font-size: 0.75rem; }
 .ping b { font: 500 0.95rem/1.3 var(--font-body); color: #fff; }
 .ping .amt { font-family: var(--font-data); color: #9EF0C8; font-size: 0.9rem; }
 @keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
-@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-copy { padding-bottom: 0; } .hero-art img { margin: 0 auto; } }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-copy { padding-bottom: 0; } .hero-art img { margin: 0 auto; max-width: 400px; } }
 
 /* Steps */
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 40px; counter-reset: s; }
@@ -217,7 +218,7 @@ footer p { max-width: 70em; }
       <div class="hero-copy">
         <span class="eyebrow">Ahorro e inversión automática</span>
         <h1 id="h-hero">Cada vez que pagas, <em>creces.</em></h1>
-        <p>Cresko aparta un monto fijo que tú eliges en cada compra con tu tarjeta de débito y lo invierte en un fondo indexado hacia tu meta. Sigues usando tu banco y tu tarjeta de siempre.</p>
+        <p>Cresko aparta un porcentaje que tú eliges de cada compra con tu tarjeta de débito y lo invierte en un fondo indexado hacia tu meta. Sigues usando tu banco y tu tarjeta de siempre.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
           <a class="btn btn-ghost" href="#lista">Unirme a la lista de espera</a>
@@ -225,11 +226,11 @@ footer p { max-width: 70em; }
         <span class="hero-note">Prototipo en validación · México, 2026</span>
       </div>
       <div class="hero-art">
-        <img src="assets/mascota.jpg" alt="La mascota de Cresko: una alcancía con cuernos de toro junto a pilas de monedas y una flecha que sube" width="736" height="680">
+        <img src="assets/mascota.webp" alt="La mascota de Cresko: una alcancía con cuernos de toro junto a pilas de monedas y una flecha que sube" width="679" height="555">
         <div class="ping" aria-hidden="true">
           <small>Débito ···· 4821 · OXXO</small>
           <b>Compra de $87.50</b>
-          <span class="amt">+$5.00 a Viaje a Oaxaca</span>
+          <span class="amt">3% · +$2.63 a tu viaje</span>
         </div>
         <div class="ping two" aria-hidden="true">
           <small>Meta · Fondo de emergencia</small>
@@ -246,11 +247,11 @@ footer p { max-width: 70em; }
       <h2 id="h-how" style="margin-top:12px">Ahorras sin decidir cada día</h2>
       <div class="steps">
         <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo apartar.</p></div>
-        <div class="step"><h3>Elige tu monto por compra</h3><p>De $2 a $20, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
-        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra suma tu monto al ahorro del día.</p></div>
+        <div class="step"><h3>Elige tu porcentaje</h3><p>Del 1% al 10% de cada compra, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
+        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra suma su porcentaje al ahorro del día.</p></div>
         <div class="step final"><h3>Se invierte hacia tu meta</h3><p>Un fondo indexado de bajo costo. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
       </div>
-      <p class="batch-note">Juntamos los montos del día y hacemos un solo cargo a tu débito por la noche. Así una compra no se vuelve diez cargos chiquitos en tu estado de cuenta.</p>
+      <p class="batch-note">Juntamos lo apartado en el día y hacemos un solo cargo a tu débito por la noche. Así una compra no se vuelve diez cargos chiquitos en tu estado de cuenta.</p>
     </div>
   </section>
 
@@ -261,14 +262,14 @@ footer p { max-width: 70em; }
       <div class="calc-grid">
         <div class="controls">
           <div class="ctl">
-            <div class="ctl-head"><label for="fee">Monto por compra</label><output id="fee-out" for="fee">$5</output></div>
-            <input id="fee" type="range" min="2" max="20" step="1" value="5">
-            <small>Lo que se aparta cada vez que pagas con débito.</small>
+            <div class="ctl-head"><label for="fee">Porcentaje de cada compra</label><output id="fee-out" for="fee">3%</output></div>
+            <input id="fee" type="range" min="1" max="10" step="1" value="3">
+            <small id="fee-ex">Con 3%, una compra de $200 aparta $6.</small>
           </div>
           <div class="ctl">
-            <div class="ctl-head"><label for="buys">Compras con débito al mes</label><output id="buys-out" for="buys">30</output></div>
-            <input id="buys" type="range" min="5" max="90" step="1" value="30">
-            <small>Una al día es lo típico para alguien que paga casi todo con tarjeta.</small>
+            <div class="ctl-head"><label for="buys">Gasto mensual con débito</label><output id="buys-out" for="buys">$6,000</output></div>
+            <input id="buys" type="range" min="1000" max="30000" step="500" value="6000">
+            <small>Súper, comida, transporte: todo lo que pagas con tu tarjeta de débito.</small>
           </div>
           <div class="ctl">
             <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">5 años</output></div>
@@ -278,7 +279,7 @@ footer p { max-width: 70em; }
         <div class="result" aria-live="polite">
           <div>
             <small style="color:#9AA0D0">Al mes apartas</small>
-            <div class="big" id="r-month">$150 <span>MXN</span></div>
+            <div class="big" id="r-month">$180 <span>MXN</span></div>
           </div>
           <div class="kpis">
             <div class="kpi"><small>En un año</small><b id="r-year">$1,800</b></div>
@@ -295,17 +296,17 @@ footer p { max-width: 70em; }
   <section aria-labelledby="h-vs">
     <div class="wrap split">
       <div style="display:grid;gap:16px">
-        <span class="eyebrow">Monto fijo, no redondeo</span>
-        <h2 id="h-vs">Sabes exactamente cuánto apartas</h2>
-        <p class="lede">Las apps de redondeo apartan lo que falta para el siguiente peso cerrado, y eso cambia en cada compra. En Cresko eliges un monto que no se mueve y un tope que no se rebasa.</p>
+        <span class="eyebrow">Porcentaje, no redondeo</span>
+        <h2 id="h-vs">Ahorras en proporción a lo que gastas</h2>
+        <p class="lede">Las apps de redondeo apartan lo que falta para el siguiente peso cerrado, así que una compra grande puede no apartar nada. En Cresko cada compra aparta el porcentaje que elegiste, con un tope mensual que no se rebasa.</p>
       </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th scope="col"></th><th scope="col">Redondeo</th><th scope="col" class="us">Cresko</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Compra de $87.50</th><td>Aparta $2.50</td><td class="us">Aparta tu monto: $5</td></tr>
-            <tr><th scope="row">Compra de $120.00</th><td>Aparta $0</td><td class="us">Aparta $5</td></tr>
-            <tr><th scope="row">Al mes</th><td>Difícil de predecir</td><td class="us">Monto × compras, con tope</td></tr>
+            <tr><th scope="row">Compra de $87.50</th><td>Aparta $2.50</td><td class="us">Con 3%: $2.63</td></tr>
+            <tr><th scope="row">Compra de $1,200.00</th><td>Aparta $0</td><td class="us">Con 3%: $36.00</td></tr>
+            <tr><th scope="row">Al mes</th><td>Difícil de predecir</td><td class="us">% de tu gasto con débito, con tope</td></tr>
             <tr><th scope="row">Destino</th><td>Casi siempre un depósito</td><td class="us">Fondo indexado hacia tu meta</td></tr>
           </tbody>
         </table>
@@ -320,7 +321,7 @@ footer p { max-width: 70em; }
       <div class="trust">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
-          <h3>Aceptas el monto expresamente</h3><p>Nada se aparta sin que confirmes el monto, el tope y la tarjeta.</p>
+          <h3>Aceptas el porcentaje expresamente</h3><p>Nada se aparta sin que confirmes el porcentaje, el tope y la tarjeta.</p>
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18h16M7 14V9m5 5V6m5 8v-3"/></svg>
@@ -363,7 +364,7 @@ footer p { max-width: 70em; }
       <div style="display:grid;gap:16px">
         <span class="eyebrow">Lista de espera</span>
         <h2 id="h-wait">Sé de las primeras personas en probarlo</h2>
-        <p class="lede">Estamos armando el piloto con personas de 18 a 35 años que pagan con débito. Cuéntanos qué monto te sentiría cómodo; con eso definimos el precio.</p>
+        <p class="lede">Estamos armando el piloto con personas de 18 a 35 años que pagan con débito. Cuéntanos qué porcentaje te sentiría cómodo; con eso afinamos el producto.</p>
       </div>
       <form id="wait-form" novalidate>
         <div class="row2">
@@ -375,12 +376,13 @@ footer p { max-width: 70em; }
         <div class="field"><label for="w-bank">Banco de tu débito principal</label>
           <select id="w-bank" name="bank"><option>BBVA</option><option>Banorte</option><option>Santander</option><option>Banamex</option><option>Nu</option><option>Mercado Pago</option><option>HSBC</option><option>Otro</option></select></div>
         <fieldset class="field" style="border:0;padding:0;margin:0">
-          <legend style="font-weight:600;font-size:var(--step--1);margin-bottom:6px">¿Cuánto apartarías por compra?</legend>
+          <legend style="font-weight:600;font-size:var(--step--1);margin-bottom:6px">¿Qué porcentaje apartarías de cada compra?</legend>
           <div class="chips">
-            <input type="radio" name="fee" id="f2" value="2"><label for="f2">$2</label>
-            <input type="radio" name="fee" id="f5" value="5" checked><label for="f5">$5</label>
-            <input type="radio" name="fee" id="f10" value="10"><label for="f10">$10</label>
-            <input type="radio" name="fee" id="f20" value="20"><label for="f20">$20</label>
+            <input type="radio" name="fee" id="f1" value="1"><label for="f1">1%</label>
+            <input type="radio" name="fee" id="f2" value="2"><label for="f2">2%</label>
+            <input type="radio" name="fee" id="f3" value="3" checked><label for="f3">3%</label>
+            <input type="radio" name="fee" id="f5" value="5"><label for="f5">5%</label>
+            <input type="radio" name="fee" id="f10" value="10"><label for="f10">10%</label>
           </div>
         </fieldset>
         <p class="err" id="w-err" hidden></p>
@@ -396,8 +398,8 @@ footer p { max-width: 70em; }
       <span class="eyebrow">Preguntas frecuentes</span>
       <h2 id="h-faq" style="margin-top:12px">Lo que nos preguntan</h2>
       <div class="faq">
-        <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Cresko lee tus compras y hace un cargo diario con la suma de tus montos.</p></details>
-        <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges $5 por compra y un tope de $300, nunca apartarás más de $300 en el mes, aunque hagas 100 compras.</p></details>
+        <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Cresko lee tus compras y hace un cargo diario con la suma de lo apartado.</p></details>
+        <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges 3% y un tope de $300, nunca apartarás más de $300 en el mes, aunque gastes $20,000.</p></details>
         <details><summary>¿Puedo sacar mi dinero?</summary><p>Sí. Puedes retirar tu inversión a tu cuenta cuando quieras. El fondo puede valer más o menos que lo que aportaste, según el mercado.</p></details>
         <details><summary>¿Cuánto cuesta?</summary><p>Estamos validando el precio en el piloto: una suscripción mensual baja o un porcentaje anual sobre lo invertido. Te lo diremos antes de que actives nada.</p></details>
         <details><summary>¿Es seguro vincular mi tarjeta?</summary><p>La conexión se hace con un proveedor especializado y tu consentimiento. Cresko nunca ve tu NIP ni tu contraseña bancaria, y puedes desvincular la tarjeta en cualquier momento.</p></details>
@@ -421,12 +423,13 @@ footer p { max-width: 70em; }
   var RATE = 0.08;
 
   function calc() {
-    var fee = +$("fee").value, buys = +$("buys").value, years = +$("years").value;
-    var month = fee * buys, n = years * 12, i = RATE / 12;
+    var pct = +$("fee").value, spend = +$("buys").value, years = +$("years").value;
+    var month = Math.round(spend * pct) / 100, n = years * 12, i = RATE / 12;
     var fv = month * ((Math.pow(1 + i, n) - 1) / i);
     var paid = month * n, growth = fv - paid;
-    $("fee-out").textContent = "$" + fee;
-    $("buys-out").textContent = buys;
+    $("fee-out").textContent = pct + "%";
+    $("fee-ex").textContent = "Con " + pct + "%, una compra de $200 aparta " + mxn.format(2 * pct) + ".";
+    $("buys-out").textContent = mxn.format(spend);
     $("years-out").textContent = years + (years === 1 ? " año" : " años");
     $("r-month").firstChild.nodeValue = mxn.format(month) + " ";
     $("r-year").textContent = mxn.format(month * 12);
