@@ -1,7 +1,8 @@
 /*
  * Cresko · MVP de la app (propuesta 3: vincular la tarjeta de débito existente)
  *
- * Pantallas: bienvenida → meta → monto → vincular tarjeta → confirmar → app.
+ * Pantallas: bienvenida → meta → perfil de inversión → porcentaje → vincular tarjeta → confirmar → app.
+ * Cresko es wealthtech: el dinero se invierte en una casa de bolsa aliada (partner.js).
  * El estado vive en localStorage para que la demo sobreviva a una recarga.
  */
 (function () {
@@ -11,7 +12,9 @@
   var KEY = "cresko.mvp.v1";
   var SPENDS = [3000, 6000, 10000, 15000]; // gasto mensual con débito para proyectar
   var PCTS = [1, 2, 3, 5, 10];
-  var EXPECTED_RATE = 0.08;     // rendimiento anual hipotético para proyecciones
+  var PORTS = window.CreskoPartner.PORTFOLIOS;
+  var MIX_COLORS = { "Deuda gubernamental": "#9AA8FF", "Acciones México": "#3F58FD", "Acciones globales": "#3525F7", "Acciones indexadas": "#3F58FD" };
+  function rate(profile) { return PORTS[profile || state.profile].mu; }
   var CHARGE_HOUR = 23;
 
   var GOALS = {
@@ -57,14 +60,14 @@
   function fresh() {
     var c = startClock();
     return {
-      v: 2, stage: "welcome", tab: "inicio", userName: "", spend: 6000,
-      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, pct: 3, spend: 6000, cap: 300, minPurchase: 20, bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
+      v: 3, stage: "welcome", tab: "inicio", userName: "", spend: 6000, profile: "moderado", contract: null,
+      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, pct: 3, spend: 6000, cap: 300, minPurchase: 20, q1: "espero", q2: "1a3", profile: "moderado", bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
       linkStep: -1, goal: null, rules: Object.assign({}, E.DEFAULT_RULES), card: null, consent: null,
       txs: [], charges: [], units: 0, contributed: 0, nav: 100, navHistory: [{ d: c, nav: 100 }],
       clock: c, logs: [], confirmUnlink: false, isExample: false
     };
   }
-  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 2 ? s : null; } catch (e) { return null; } }
+  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 3 ? s : null; } catch (e) { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
   var state = load() || fresh();
@@ -80,6 +83,7 @@
   }
 
   var provider = new window.CreskoProvider.MockCardProvider(log);
+  var partner = new window.CreskoPartner.MockInvestmentPartner(log);
   provider.onTransaction(function (tx) {
     var rec = E.applyPurchase(state, tx);
     if (rec.status === "pendiente") log("motor", "apartado +" + m2(rec.fee) + (rec.reason ? " (" + rec.reason.toLowerCase() + ")" : ""), { pendiente_hoy: m2(E.pendingTotal(state)) });
@@ -107,11 +111,11 @@
       log("motor", "cierre del día: cargo agrupado", { compras: E.pending(state).length, total: m2(total) });
       var res = provider.charge(state.card.cardId, total, rand);
       var ch = E.settle(state, res, state.nav, state.clock);
-      if (ch.status === "invertido") log("motor", "invertido en fondo", { unidades: ch.units.toFixed(4), precio: state.nav.toFixed(4) });
+      if (ch.status === "invertido") { partner.buy(state.contract, state.profile, ch.amount, state.nav); log("motor", "unidades acreditadas", { unidades: ch.units.toFixed(4) }); }
       else log("motor", "cargo rechazado: no se invierte; se avisa al usuario");
     }
     var n = new Date(d); n.setDate(n.getDate() + 1); n.setHours(8, Math.floor(rand() * 50), 0, 0);
-    state.nav = E.nextNav(state.nav, rand);
+    state.nav = E.nextNav(state.nav, rand, PORTS[state.profile].mu, PORTS[state.profile].sigma);
     state.clock = n.toISOString();
     state.navHistory.push({ d: state.clock, nav: state.nav });
     if (state.navHistory.length > 400) state.navHistory.shift();
@@ -132,6 +136,7 @@
     state.goal = { kind: "viaje", name: "Viaje a Oaxaca", target: 15000 };
     state.rules = { pct: 3, cap: 300, minPurchase: 20, paused: false };
     state.spend = 6000;
+    state.profile = "moderado"; state.contract = "48210042";
     state.card = { cardId: "card_demo", bank: "BBVA", last4: "4821", holder: "Ana López", status: "activa", linkedAt: state.clock };
     state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
     state.stage = "app"; state.isExample = true;
@@ -147,9 +152,9 @@
 
   function value() { return E.portfolioValue(state, state.nav); }
   function expectedMonthly(rules, spend) { return E.monthlyContribution(rules, spend == null ? state.spend : spend); }
-  function consentText(r, card) {
+  function consentText(r, card, profile) {
     return "Acepto que Cresko cargue a mi tarjeta ···· " + card.last4 + " el " + pc(r.pct) + " de cada compra" +
-      (r.minPurchase ? " de " + m0(r.minPurchase) + " o más" : "") + ", hasta " + m0(r.cap) + " al mes, en un solo cargo diario, y lo invierta en un fondo indexado. Puedo pausar o cancelar en cualquier momento.";
+      (r.minPurchase ? " de " + m0(r.minPurchase) + " o más" : "") + ", hasta " + m0(r.cap) + " al mes, en un solo cargo diario, y lo invierta a mi nombre en el portafolio " + PORTS[profile || state.profile].name + " a través de la casa de bolsa aliada. Puedo pausar o cancelar en cualquier momento.";
   }
 
   /* ---------- Render ---------- */
@@ -164,7 +169,7 @@
     toastTimer = setTimeout(function () { t.hidden = true; }, 2600);
   }
 
-  function dots(n) { var s = ""; for (var i = 1; i <= 4; i++) s += '<i class="' + (i <= n ? "on" : "") + '"></i>'; return '<div class="progress-dots" aria-label="Paso ' + n + ' de 4">' + s + "</div>"; }
+  function dots(n) { var s = ""; for (var i = 1; i <= 5; i++) s += '<i class="' + (i <= n ? "on" : "") + '"></i>'; return '<div class="progress-dots" aria-label="Paso ' + n + ' de 5">' + s + "</div>"; }
   function header(step, back) {
     return '<div class="head-row"><button class="icon-btn" data-act="go" data-to="' + back + '" aria-label="Atrás">' + icon("back") + '</button><div style="flex:1">' + dots(step) + "</div></div>";
   }
@@ -191,20 +196,42 @@
         '<div class="field"><label for="i-user">¿Cómo te llamas?</label><input id="i-user" data-bind="userName" autocomplete="given-name" value="' + esc(state.userName) + '" placeholder="Tu nombre"></div>' +
         '<div class="field"><label for="i-gname">Nombre de la meta</label><input id="i-gname" data-bind="draft.goalName" value="' + esc(d.goalName) + '"></div>' +
         '<div class="field"><label for="i-target">¿Cuánto necesitas?</label><input id="i-target" class="big" type="number" min="500" step="500" inputmode="numeric" data-bind="draft.target" value="' + d.target + '"></div>' +
-        '<div class="spacer"></div><button class="btn btn-primary block" data-act="go" data-to="rules" data-need="goal">Continuar</button>';
+        '<div class="spacer"></div><button class="btn btn-primary block" data-act="go" data-to="perfil" data-need="goal">Continuar</button>';
+    },
+
+    perfil: function () {
+      var d = state.draft, rec = recommend(d);
+      function q(field, opts) {
+        return '<div class="chips" role="group">' + opts.map(function (o) {
+          return '<button class="chip" style="font-family:var(--font-body);font-size:.85rem" data-act="answer" data-field="' + field + '" data-val="' + o[0] + '" aria-pressed="' + (d[field] === o[0]) + '">' + o[1] + "</button>";
+        }).join("") + "</div>";
+      }
+      var cards = Object.keys(PORTS).map(function (k) {
+        var p = PORTS[k];
+        return '<button class="port" data-act="profile-pick" data-profile="' + k + '" aria-pressed="' + (d.profile === k) + '">' +
+          '<div class="port-head"><b>' + p.name + "</b>" + (k === rec ? '<span class="pill good">Recomendado</span>' : '<span class="pill off">' + p.risk + "</span>") + "</div>" +
+          "<small>" + p.blurb + "</small>" + mixBar(p) + "</button>";
+      }).join("");
+      return header(2, "goal") +
+        '<div class="stack"><span class="eyebrow">Tu perfil de inversión</span><h2>¿Cómo quieres invertir?</h2><p class="muted small">Tu dinero se invierte a tu nombre en una casa de bolsa aliada, regulada por la CNBV.</p></div>' +
+        '<div class="field"><span class="lbl">Si tu inversión baja 10% en un mes, ¿qué haces?</span>' + q("q1", [["vendo", "Retiro todo"], ["espero", "Espero"], ["compro", "Aporto más"]]) + "</div>" +
+        '<div class="field"><span class="lbl">¿Cuándo vas a usar este dinero?</span>' + q("q2", [["menos1", "En menos de 1 año"], ["1a3", "De 1 a 3 años"], ["mas3", "En más de 3 años"]]) + "</div>" +
+        '<div class="stack">' + cards + "</div>" +
+        '<p class="muted small">Rendimientos y riesgos hipotéticos. Puedes cambiar de perfil cuando quieras.</p>' +
+        '<button class="btn btn-primary block" data-act="go" data-to="rules">Continuar</button>';
     },
 
     rules: function () {
       var d = state.draft;
       var r = { pct: d.pct, cap: d.cap };
       var mo = expectedMonthly(r, d.spend);
-      var n = E.monthsToGoal(0, mo, d.target, EXPECTED_RATE);
+      var n = E.monthsToGoal(0, mo, d.target, rate(d.profile));
       function chips(field, vals, fmt) {
         return '<div class="chips" role="group">' + vals.map(function (v) {
           return '<button class="chip" data-act="set" data-field="' + field + '" data-val="' + v + '" aria-pressed="' + (d[field] === v) + '">' + fmt(v) + "</button>";
         }).join("") + "</div>";
       }
-      return header(2, "goal") +
+      return header(3, "perfil") +
         '<div class="stack"><span class="eyebrow">Tu porcentaje</span><h2>¿Qué porcentaje apartamos de cada compra?</h2><p class="muted small">Ahorras en proporción a lo que gastas. Lo puedes ajustar cuando quieras.</p></div>' +
         '<div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + '<small class="muted">Con ' + pc(d.pct) + ", una compra de $200 aparta " + m2(E.feeFor({ pct: d.pct }, 200)) + ".</small></div>" +
         '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + '<small class="muted">Al llegar al tope dejamos de apartar hasta el siguiente mes.</small></div>' +
@@ -214,7 +241,7 @@
           SPENDS.map(function (v) { return '<option value="' + v + '"' + (d.spend === v ? " selected" : "") + ">Unos " + m0(v) + "</option>"; }).join("") + "</select></div>" +
         '<div class="projection"><small>Gastando ' + m0(d.spend) + ' al mes apartarías</small><b>' + m0(mo) + ' al mes</b>' +
           '<small>Llegarías a ' + m0(d.target) + ' en <span class="num">' + months(n) + "</span>*</small></div>" +
-        '<p class="muted small">*Hipotético, con 8% anual. El fondo puede subir o bajar.</p>' +
+        '<p class="muted small">*Hipotético, con ' + Math.round(rate(d.profile) * 100) + '% anual de ' + PORTS[d.profile].name + '. Tu inversión puede subir o bajar.</p>' +
         '<button class="btn btn-primary block" data-act="go" data-to="card">Continuar</button>';
     },
 
@@ -223,7 +250,7 @@
       var banks = provider.institutions().map(function (b) {
         return '<button class="bank" data-act="bank" data-bank="' + esc(b) + '" aria-pressed="' + (d.bank === b) + '">' + esc(b) + "</button>";
       }).join("");
-      return header(3, "rules") +
+      return header(4, "rules") +
         '<div class="stack"><span class="eyebrow">Tu tarjeta</span><h2>Vincula tu débito de siempre</h2><p class="muted small">No cambias de banco ni de tarjeta. Solo leemos tus compras para saber cuándo apartar.</p></div>' +
         '<div class="field"><span class="lbl">Banco</span><div class="bank-grid">' + banks + "</div></div>" +
         '<div class="field"><label for="i-last4">Últimos 4 dígitos de la tarjeta</label><input id="i-last4" class="big" inputmode="numeric" maxlength="4" placeholder="0000" data-bind="draft.last4" value="' + esc(d.last4) + '"></div>' +
@@ -234,7 +261,7 @@
 
     linking: function () {
       var d = state.draft;
-      var labels = ["Conectando con " + d.bank, "Verificando que la tarjeta ···· " + d.last4 + " es tuya", "Leyendo tus compras recientes"];
+      var labels = ["Conectando con " + d.bank, "Verificando que la tarjeta ···· " + d.last4 + " es tuya", "Leyendo tus compras recientes", "Abriendo tu contrato en la casa de bolsa aliada"];
       var rows = labels.map(function (l, i) {
         var cls = i < state.linkStep ? "done" : i === state.linkStep ? "now" : "";
         return '<div class="' + cls + '"><span class="dot">' + (cls === "done" ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3">' + ICONS.check + "</svg>" : "") + "</span>" + esc(l) + "</div>";
@@ -246,7 +273,7 @@
     confirm: function () {
       var d = state.draft;
       var r = { pct: d.pct, cap: d.cap, minPurchase: d.minPurchase };
-      return header(4, "card") +
+      return header(5, "card") +
         '<div class="stack"><span class="eyebrow">Último paso</span><h2>Confirma tus reglas</h2></div>' +
         '<dl class="card summary">' +
           "<div><dt>Meta</dt><dd>" + esc(d.goalName) + " · " + m0(d.target) + "</dd></div>" +
@@ -255,15 +282,16 @@
           "<div><dt>Tope mensual</dt><dd>" + m0(d.cap) + "</dd></div>" +
           "<div><dt>Compras mínimas</dt><dd>" + (d.minPurchase ? m0(d.minPurchase) : "Todas") + "</dd></div>" +
           "<div><dt>Cobro</dt><dd>Un cargo al día, 23:00</dd></div>" +
-          "<div><dt>Destino</dt><dd>Fondo indexado</dd></div>" +
+          "<div><dt>Portafolio</dt><dd>" + PORTS[d.profile].name + "</dd></div>" +
+          "<div><dt>Custodia</dt><dd>Casa de bolsa aliada" + (state.pendingContract ? " · ···· " + esc(state.pendingContract.slice(-4)) : "") + "</dd></div>" +
         "</dl>" +
-        '<label class="check"><input type="checkbox" id="i-fee" data-bind="draft.feeConsent"' + (d.feeConsent ? " checked" : "") + "><span>" + esc(consentText(r, { last4: d.last4 })) + "</span></label>" +
+        '<label class="check"><input type="checkbox" id="i-fee" data-bind="draft.feeConsent"' + (d.feeConsent ? " checked" : "") + "><span>" + esc(consentText(r, { last4: d.last4 }, d.profile)) + "</span></label>" +
         '<div class="spacer"></div><button class="btn btn-primary block" data-act="activate" data-need="confirm">Activar Cresko</button>';
     },
 
     inicio: function () {
       var v = value(), g = state.goal, pct = Math.min(100, v / g.target * 100);
-      var n = E.monthsToGoal(v, state.rules.paused ? 0 : expectedMonthly(state.rules), g.target, EXPECTED_RATE);
+      var n = E.monthsToGoal(v, state.rules.paused ? 0 : expectedMonthly(state.rules), g.target, rate());
       var monthUsed = E.monthTotal(state, state.clock);
       var C = 2 * Math.PI * 38;
       var ring = '<svg class="ring" viewBox="0 0 92 92" role="img" aria-label="' + pct.toFixed(0) + '% de la meta"><defs><linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#8D9BFF"/><stop offset="1" stop-color="#4A63FF"/></linearGradient></defs>' +
@@ -303,7 +331,9 @@
           '<span class="pill ' + (gain >= 0 ? "good" : "warn") + '" style="justify-self:start">' + (gain >= 0 ? "+" : "") + m2(gain) + " (" + pct.toFixed(2) + "%)</span>" + spark() + "</div>" +
         '<div class="kpi-row"><div class="card kpi"><small>Aportado</small><b>' + m2(state.contributed) + '</b></div><div class="card kpi"><small>Unidades</small><b>' + state.units.toFixed(4) + "</b></div>" +
           '<div class="card kpi"><small>Precio por unidad</small><b>' + m2(state.nav) + '</b></div><div class="card kpi"><small>Cargos invertidos</small><b>' + state.charges.filter(function (c) { return c.status === "invertido"; }).length + "</b></div></div>" +
-        '<div class="card stack"><b>Fondo indexado de renta variable</b><p class="muted small">Replica un índice amplio de acciones, diversificado y de bajo costo. En el piloto lo operará una distribuidora o asesor registrado ante la CNBV. Aquí su precio es simulado.</p></div>';
+        '<div class="card stack"><div class="port-head"><b>' + PORTS[state.profile].name + '</b><span class="pill off">' + PORTS[state.profile].risk + "</span></div>" + mixBar(PORTS[state.profile]) +
+          '<span class="small muted">Comisión total estimada: ' + PORTS[state.profile].fee.toFixed(1) + "% anual sobre lo invertido.</span></div>" +
+        '<div class="card stack"><b>Dónde está tu dinero</b><p class="muted small">A tu nombre, en tu contrato de la casa de bolsa aliada, regulada por la CNBV. Cresko no custodia tu dinero: te ayuda a invertirlo.</p><span class="small">Contrato <span class="num">···· ' + esc((state.contract || "").slice(-4)) + "</span></span></div>";
     },
 
     ajustes: function () {
@@ -318,6 +348,7 @@
           '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + "</div>" +
           '<div class="field"><label for="i-rmin">No apartar en compras menores a</label><select id="i-rmin" data-act-change="rule-min">' + [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (r.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
           '<p class="muted small">Los cambios aplican desde tu siguiente compra.</p></div>' +
+        '<div class="card stack"><div class="field"><span class="lbl">Perfil de inversión</span><div class="chips">' + Object.keys(PORTS).map(function (k) { return '<button class="chip" style="font-family:var(--font-body);font-size:.85rem" data-act="profile" data-profile="' + k + '" aria-pressed="' + (state.profile === k) + '">' + PORTS[k].name.replace("Cresko ", "") + "</button>"; }).join("") + '</div></div><p class="muted small">Si cambias de perfil, la casa de bolsa rebalancea tu inversión al siguiente día hábil.</p></div>' +
         '<div class="card stack"><b>Tarjeta</b><span class="muted small">' + esc(state.card.bank) + " ···· " + esc(state.card.last4) + " · " + esc(state.card.holder) + "</span>" +
           (linked ? (state.confirmUnlink
             ? '<p class="small">Dejaremos de leer tus compras y no habrá más cargos. Tu inversión se queda donde está.</p><div class="chips"><button class="btn btn-danger btn-sm" data-act="unlink">Sí, desvincular</button><button class="btn btn-line btn-sm" data-act="unlink-cancel">Cancelar</button></div>'
@@ -326,6 +357,17 @@
         '<div class="card stack"><b>Tu autorización</b><p class="muted small">' + esc(state.consent.text) + '</p><span class="small muted">Aceptada el ' + esc(fFull.format(new Date(state.consent.acceptedAt))) + "</span></div>";
     }
   };
+
+  function recommend(d) {
+    var score = { vendo: 0, espero: 1, compro: 2 }[d.q1] + { menos1: 0, "1a3": 1, mas3: 2 }[d.q2];
+    if (d.q2 === "menos1" || score <= 1) return "conservador";
+    return score >= 4 ? "crecimiento" : "moderado";
+  }
+
+  function mixBar(p) {
+    return '<div class="mix"><div class="mix-bar">' + p.mix.map(function (m) { return '<i style="width:' + m[1] + "%;background:" + MIX_COLORS[m[0]] + '"></i>'; }).join("") + "</div>" +
+      '<div class="mix-leg">' + p.mix.map(function (m) { return '<span style="--c:' + MIX_COLORS[m[0]] + '">' + m[0] + " " + m[1] + "%</span>"; }).join("") + "</div></div>";
+  }
 
   function txRow(t) {
     var pill = t.status === "cobrado" ? '<span class="pill good">Invertido</span>' : t.status === "pendiente" ? '<span class="pill info">Por cobrar</span>' : '<span class="pill off" title="' + esc(t.reason) + '">' + esc(t.reason) + "</span>";
@@ -421,6 +463,17 @@
         d.goalKind = k; d.goalName = GOALS[k].name; d.target = GOALS[k].target; break;
       case "set": d[b.getAttribute("data-field")] = +b.getAttribute("data-val"); break;
       case "bank": d.bank = b.getAttribute("data-bank"); break;
+      case "answer": d[b.getAttribute("data-field")] = b.getAttribute("data-val"); d.profile = recommend(d); break;
+      case "profile-pick": d.profile = b.getAttribute("data-profile"); break;
+      case "profile":
+        var np = b.getAttribute("data-profile");
+        if (np !== state.profile) {
+          partner.rebalance(state.contract, state.profile, np);
+          state.profile = np;
+          state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
+          toast("Cambiamos tu portafolio a " + PORTS[np].name + ".");
+        }
+        break;
       case "example": loadExample(); toast("Cargamos 6 semanas de compras de ejemplo."); break;
       case "link": startLink(); return;
       case "activate": activate(); break;
@@ -456,8 +509,13 @@
     state.stage = "linking"; state.linkStep = 0; render();
     provider.linkCard({ bank: d.bank, last4: d.last4, holder: d.holder.trim() }, function (i) { state.linkStep = i; render(); })
       .then(function (card) {
-        state.linkStep = 3;
         state.pendingCard = card;
+        state.linkStep = 3; render();
+        return state.contract ? { contract: state.contract } : partner.openContract({ name: d.holder.trim(), profile: d.profile });
+      })
+      .then(function (res) {
+        state.pendingContract = res.contract;
+        state.linkStep = 4;
         state.stage = "confirm"; render();
       });
   }
@@ -467,11 +525,12 @@
     state.goal = { kind: d.goalKind, name: d.goalName.trim(), target: d.target };
     state.rules = { pct: d.pct, cap: d.cap, minPurchase: d.minPurchase, paused: false };
     state.spend = d.spend;
+    state.profile = d.profile; state.contract = state.pendingContract;
     state.card = { cardId: c.cardId, bank: c.bank, last4: c.last4, holder: c.holder, status: "activa", linkedAt: state.clock };
     state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
     state.stage = "app"; state.tab = "inicio"; state.isExample = false;
-    delete state.pendingCard;
-    log("evento", "consent.accepted", { porcentaje: pc(d.pct), tope: m0(d.cap), minimo: m0(d.minPurchase) });
+    delete state.pendingCard; delete state.pendingContract;
+    log("evento", "consent.accepted", { porcentaje: pc(d.pct), tope: m0(d.cap), minimo: m0(d.minPurchase), portafolio: PORTS[d.profile].name });
     toast("Listo, " + (state.userName.trim() || "") + ". Tu próxima compra ya suma a tu meta.");
   }
 

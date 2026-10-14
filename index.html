@@ -27,6 +27,7 @@
   --accent-soft: #E8EBFF;
   --on-accent: #FFFFFF;
   --good: #11865B;
+  --mix-1: #9AA8FF; --mix-2: #3F58FD; --mix-3: #3525F7;
   --font-display: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -107,6 +108,27 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 @media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
 .batch-note { margin-top: 20px; color: var(--muted); font-size: var(--step--1); max-width: 62em; }
+
+/* Inversión */
+.chain { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.chain li { position: relative; display: grid; gap: 4px; padding: 16px; border-radius: var(--r); border: 1px solid var(--line); background: var(--paper); min-width: 0; }
+.chain li span { color: var(--muted); font-size: var(--step--1); }
+.chain li:not(:last-child)::after { content: "→"; position: absolute; right: -11px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: 700; background: var(--surface); line-height: 1; }
+.chain li.end { background: var(--navy); border-color: var(--navy); color: #fff; }
+.chain li.end span { color: #C9CEF5; }
+@media (max-width: 760px) { .chain { grid-template-columns: 1fr; } .chain li:not(:last-child)::after { content: "↓"; right: auto; left: 20px; top: auto; bottom: -11px; transform: none; } }
+.ports { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.port { border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 10px; align-content: start; background: var(--paper); min-width: 0; }
+.port-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.port p { color: var(--muted); font-size: var(--step--1); }
+.port small { color: var(--muted); font-size: 0.78rem; }
+.tag { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.mixbar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; }
+.mixbar i { display: block; height: 100%; }
+@media (max-width: 860px) { .ports { grid-template-columns: 1fr; } }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { font: 600 var(--step--1)/1 var(--font-body); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 /* Calculadora */
 .calc { background: var(--surface); border-block: 1px solid var(--line); }
@@ -205,6 +227,7 @@ footer p { max-width: 70em; }
     <a class="brand" href="#inicio" aria-label="Cresko, inicio"><img src="assets/logo-mark.svg" alt="">cresko</a>
     <nav aria-label="Principal">
       <a href="#como-funciona">Cómo funciona</a>
+      <a href="#inversion">Inversión</a>
       <a href="#calculadora">Calculadora</a>
       <a href="#confianza">Seguridad</a>
       <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
@@ -216,9 +239,9 @@ footer p { max-width: 70em; }
   <section class="hero" aria-labelledby="h-hero">
     <div class="wrap">
       <div class="hero-copy">
-        <span class="eyebrow">Ahorro e inversión automática</span>
+        <span class="eyebrow">Wealthtech · Ahorro e inversión automática</span>
         <h1 id="h-hero">Cada vez que pagas, <em>creces.</em></h1>
-        <p>Cresko aparta un porcentaje que tú eliges de cada compra con tu tarjeta de débito y lo invierte en un fondo indexado hacia tu meta. Sigues usando tu banco y tu tarjeta de siempre.</p>
+        <p>Cresko aparta un porcentaje que tú eliges de cada compra con tu tarjeta de débito y lo invierte, a tu nombre, en un portafolio de una casa de bolsa regulada. Sigues usando tu banco y tu tarjeta de siempre.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
           <a class="btn btn-ghost" href="#lista">Unirme a la lista de espera</a>
@@ -249,13 +272,48 @@ footer p { max-width: 70em; }
         <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo apartar.</p></div>
         <div class="step"><h3>Elige tu porcentaje</h3><p>Del 1% al 10% de cada compra, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
         <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra suma su porcentaje al ahorro del día.</p></div>
-        <div class="step final"><h3>Se invierte hacia tu meta</h3><p>Un fondo indexado de bajo costo. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
+        <div class="step final"><h3>Se invierte hacia tu meta</h3><p>En tu portafolio, con una casa de bolsa aliada. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
       </div>
       <p class="batch-note">Juntamos lo apartado en el día y hacemos un solo cargo a tu débito por la noche. Así una compra no se vuelve diez cargos chiquitos en tu estado de cuenta.</p>
     </div>
   </section>
 
-  <section id="calculadora" class="calc" aria-labelledby="h-calc">
+  <section id="inversion" class="calc" aria-labelledby="h-inv">
+    <div class="wrap">
+      <span class="eyebrow">Inversión con socios regulados</span>
+      <h2 id="h-inv" style="margin-top:12px">Tú pones el hábito. Una casa de bolsa regulada invierte por ti.</h2>
+      <p class="lede" style="margin-top:14px">Cresko es la app que convierte tus compras en inversión. El dinero se invierte y se guarda a tu nombre en casas de bolsa y operadoras de fondos reguladas por la CNBV con las que trabajamos.</p>
+      <ol class="chain" aria-label="Recorrido de tu dinero">
+        <li><b>Tu débito</b><span>Pagas como siempre</span></li>
+        <li><b>Cresko</b><span>Calcula tu porcentaje y junta lo del día</span></li>
+        <li><b>Casa de bolsa aliada</b><span>Abre tu contrato, invierte y custodia</span></li>
+        <li class="end"><b>Tu portafolio</b><span>A tu nombre, hacia tu meta</span></li>
+      </ol>
+      <div class="ports">
+        <div class="port">
+          <div class="port-top"><h3>Conservador</h3><span class="tag">Riesgo bajo</span></div>
+          <p>Para metas de menos de un año o si no quieres ver bajas grandes.</p>
+          <div class="mixbar"><i style="width:80%;background:var(--mix-1)"></i><i style="width:20%;background:var(--mix-2)"></i></div>
+          <small>80% deuda gubernamental · 20% acciones indexadas</small>
+        </div>
+        <div class="port">
+          <div class="port-top"><h3>Moderado</h3><span class="tag">Riesgo medio</span></div>
+          <p>Equilibrio entre estabilidad y crecimiento para metas de 1 a 3 años.</p>
+          <div class="mixbar"><i style="width:50%;background:var(--mix-1)"></i><i style="width:20%;background:var(--mix-2)"></i><i style="width:30%;background:var(--mix-3)"></i></div>
+          <small>50% deuda · 20% acciones México · 30% acciones globales</small>
+        </div>
+        <div class="port">
+          <div class="port-top"><h3>Crecimiento</h3><span class="tag">Riesgo alto</span></div>
+          <p>Para metas de más de 3 años, como el retiro. Sube y baja más.</p>
+          <div class="mixbar"><i style="width:15%;background:var(--mix-1)"></i><i style="width:30%;background:var(--mix-2)"></i><i style="width:55%;background:var(--mix-3)"></i></div>
+          <small>15% deuda · 30% acciones México · 55% acciones globales</small>
+        </div>
+      </div>
+      <p class="batch-note">Un cuestionario de dos preguntas te recomienda un perfil. Puedes cambiarlo cuando quieras y la casa de bolsa rebalancea tu inversión.</p>
+    </div>
+  </section>
+
+  <section id="calculadora" aria-labelledby="h-calc">
     <div class="wrap">
       <span class="eyebrow">Calculadora</span>
       <h2 id="h-calc" style="margin-top:12px">¿Cuánto juntarías sin notarlo?</h2>
@@ -270,6 +328,14 @@ footer p { max-width: 70em; }
             <div class="ctl-head"><label for="buys">Gasto mensual con débito</label><output id="buys-out" for="buys">$6,000</output></div>
             <input id="buys" type="range" min="1000" max="30000" step="500" value="6000">
             <small>Súper, comida, transporte: todo lo que pagas con tu tarjeta de débito.</small>
+          </div>
+          <div class="ctl">
+            <div class="ctl-head"><span style="font-weight:600" id="prof-lbl">Portafolio</span><output id="prof-out">9% anual</output></div>
+            <div class="seg" role="group" aria-labelledby="prof-lbl">
+              <button type="button" data-rate="0.07" aria-pressed="false">Conservador</button>
+              <button type="button" data-rate="0.09" aria-pressed="true">Moderado</button>
+              <button type="button" data-rate="0.11" aria-pressed="false">Crecimiento</button>
+            </div>
           </div>
           <div class="ctl">
             <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">5 años</output></div>
@@ -287,13 +353,13 @@ footer p { max-width: 70em; }
           </div>
           <div class="bar" role="img" id="r-bar" aria-label="Proporción entre lo aportado y el rendimiento"><i class="in" id="b-in" style="width:80%"></i><i class="gr" id="b-gr" style="width:20%"></i></div>
           <div class="legend"><span id="l-in">Aportado $9,000</span><span class="g" id="l-gr">Rendimiento $1,900</span></div>
-          <p class="fine">Ejemplo hipotético con 8% anual compuesto cada mes, antes de comisiones e impuestos. Un fondo indexado puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
+          <p class="fine" id="r-fine">Ejemplo hipotético con 9% anual compuesto cada mes, antes de comisiones e impuestos. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section aria-labelledby="h-vs">
+  <section class="calc" aria-labelledby="h-vs">
     <div class="wrap split">
       <div style="display:grid;gap:16px">
         <span class="eyebrow">Porcentaje, no redondeo</span>
@@ -314,7 +380,7 @@ footer p { max-width: 70em; }
     </div>
   </section>
 
-  <section id="confianza" class="calc" aria-labelledby="h-trust">
+  <section id="confianza" aria-labelledby="h-trust">
     <div class="wrap">
       <span class="eyebrow">Tú tienes el control</span>
       <h2 id="h-trust" style="margin-top:12px">Reglas claras desde el primer día</h2>
@@ -337,11 +403,11 @@ footer p { max-width: 70em; }
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>
-          <h3>Fondo indexado de bajo costo</h3><p>Diversificado y con comisión baja, según tu perfil de riesgo.</p>
+          <h3>Portafolios de bajo costo</h3><p>Fondos diversificados, con una comisión total cercana a 1% anual, según tu perfil.</p>
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-          <h3>Con una institución regulada</h3><p>La inversión operará con una distribuidora o asesor registrado ante la CNBV. Alianza en proceso.</p>
+          <h3>Tu dinero, a tu nombre</h3><p>Vive en tu contrato de una casa de bolsa aliada regulada por la CNBV. Cresko no custodia tu dinero.</p>
         </div>
       </div>
     </div>
@@ -354,7 +420,7 @@ footer p { max-width: 70em; }
       <div class="figs">
         <div class="fig"><b>71%</b><p>de las compras con tarjeta se hacen con débito.</p><small>Banxico, noviembre 2024</small></div>
         <div class="fig"><b>8%</b><p>de los adultos ahorra solo en instrumentos formales.</p><small>ENIF 2024, INEGI y CNBV</small></div>
-        <div class="fig"><b>197 M</b><p>tarjetas de débito vigentes, frente a 39 M de crédito.</p><small>Banxico, 1T 2024</small></div>
+        <div class="fig"><b>31</b><p>fintechs de gestión patrimonial en México: un segmento poco poblado.</p><small>Finnovista Fintech Radar México 2025</small></div>
       </div>
     </div>
   </section>
@@ -401,7 +467,8 @@ footer p { max-width: 70em; }
         <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Cresko lee tus compras y hace un cargo diario con la suma de lo apartado.</p></details>
         <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges 3% y un tope de $300, nunca apartarás más de $300 en el mes, aunque gastes $20,000.</p></details>
         <details><summary>¿Puedo sacar mi dinero?</summary><p>Sí. Puedes retirar tu inversión a tu cuenta cuando quieras. El fondo puede valer más o menos que lo que aportaste, según el mercado.</p></details>
-        <details><summary>¿Cuánto cuesta?</summary><p>Estamos validando el precio en el piloto: una suscripción mensual baja o un porcentaje anual sobre lo invertido. Te lo diremos antes de que actives nada.</p></details>
+        <details><summary>¿Quién guarda mi dinero?</summary><p>Una casa de bolsa u operadora de fondos regulada por la CNBV con la que Cresko tiene un convenio. Tu inversión está en un contrato a tu nombre; Cresko es la app que te ayuda a ahorrar e invertir.</p></details>
+        <details><summary>¿Cuánto cuesta?</summary><p>Una comisión anual sobre lo invertido, cercana a 1%, que incluye el costo del fondo. La confirmaremos en el piloto y te la diremos antes de que actives nada.</p></details>
         <details><summary>¿Es seguro vincular mi tarjeta?</summary><p>La conexión se hace con un proveedor especializado y tu consentimiento. Cresko nunca ve tu NIP ni tu contraseña bancaria, y puedes desvincular la tarjeta en cualquier momento.</p></details>
       </div>
     </div>
@@ -411,8 +478,8 @@ footer p { max-width: 70em; }
 <footer>
   <div class="wrap">
     <a class="brand" href="#inicio"><img src="assets/logo-mark.svg" alt="" style="width:26px;height:26px">cresko</a>
-    <p>Cresko Smart Savings es un prototipo en validación. Las cifras de la calculadora son hipotéticas y no constituyen asesoría de inversión. La operación de inversión dependerá de una alianza con una entidad autorizada por la CNBV.</p>
-    <p>Datos: ENIF 2024 (INEGI y CNBV); Banxico vía Expansión y Plaza de Armas.</p>
+    <p>Cresko Smart Savings es un prototipo en validación. Las cifras de la calculadora son hipotéticas y no constituyen asesoría de inversión. La inversión se realizará a través de casas de bolsa u operadoras de fondos autorizadas por la CNBV con las que Cresko tenga un convenio comercial.</p>
+    <p>Datos: ENIF 2024 (INEGI y CNBV); Banxico vía Expansión; Finnovista Fintech Radar México 2025.</p>
   </div>
 </footer>
 
@@ -420,7 +487,7 @@ footer p { max-width: 70em; }
 (function () {
   var mxn = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
   var $ = function (id) { return document.getElementById(id); };
-  var RATE = 0.08;
+  var RATE = 0.09;
 
   function calc() {
     var pct = +$("fee").value, spend = +$("buys").value, years = +$("years").value;
@@ -442,6 +509,16 @@ footer p { max-width: 70em; }
     $("l-gr").textContent = "Rendimiento " + mxn.format(growth);
   }
   ["fee", "buys", "years"].forEach(function (id) { $(id).addEventListener("input", calc); });
+  document.querySelectorAll(".seg button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".seg button").forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+      RATE = +b.getAttribute("data-rate");
+      var p = Math.round(RATE * 100) + "% anual";
+      $("prof-out").textContent = p;
+      $("r-fine").textContent = "Ejemplo hipotético con " + p + " compuesto cada mes, antes de comisiones e impuestos. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.";
+      calc();
+    });
+  });
   calc();
 
   var KEY = "cresko.waitlist";

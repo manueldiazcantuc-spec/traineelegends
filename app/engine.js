@@ -114,10 +114,11 @@
     };
   }
 
-  /** Un día hábil del fondo simulado: ~8% anual esperado, ~12% de volatilidad. */
-  function nextNav(nav, rand) {
+  /** Un día del portafolio simulado con rendimiento anual `mu` y volatilidad `sigma`. */
+  function nextNav(nav, rand, mu, sigma) {
+    mu = mu == null ? 0.08 : mu; sigma = sigma == null ? 0.12 : sigma;
     var z = Math.sqrt(-2 * Math.log(rand() || 1e-9)) * Math.cos(2 * Math.PI * rand());
-    return Math.round(nav * (1 + 0.08 / 365 + 0.12 * z / Math.sqrt(365)) * 10000) / 10000;
+    return Math.round(nav * (1 + mu / 365 + sigma * z / Math.sqrt(365)) * 10000) / 10000;
   }
 
   var api = {

@@ -30,7 +30,7 @@
       <div class="panel-card">
         <span class="eyebrow">Simulador del piloto</span>
         <h2>Prueba el flujo completo sin tarjeta real</h2>
-        <p>Cada botón imita lo que hará el banco o el procesador de pagos. La bitácora de abajo muestra los eventos que recibirá el backend en la prueba con tarjeta real.</p>
+        <p>Cada botón imita lo que harán el banco, el procesador de pagos y la casa de bolsa aliada. La bitácora de abajo muestra los eventos que recibirá el backend en la prueba con tarjeta real.</p>
         <div class="clock"><span class="muted small">Fecha simulada</span><b id="clock">—</b></div>
         <div class="controls">
           <button class="btn btn-primary btn-sm" id="c-buy">Simular compra</button>
@@ -60,7 +60,7 @@
           <div><b>El banco avisa</b>El agregador manda un webhook con monto, comercio y fecha.</div>
           <div><b>El motor decide</b>Calcula tu porcentaje de la compra y aplica el mínimo y el tope mensual.</div>
           <div><b>Un cargo al día</b>A las 23:00 se cobra la suma del día a tu débito.</div>
-          <div><b>Se invierte</b>El cargo compra unidades del fondo al precio del día.</div>
+          <div><b>Se invierte</b>La casa de bolsa aliada compra tu portafolio a tu nombre.</div>
         </div>
       </div>
     </aside>
@@ -69,6 +69,7 @@
 
 <script src="engine.js"></script>
 <script src="provider.js"></script>
+<script src="partner.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
