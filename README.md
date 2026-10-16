@@ -15,6 +15,8 @@ aliada y regulada por la CNBV. Este repositorio sigue la
   - `app.js`, `app.css`: pantallas y estilos.
 - `nominax/`: consola interna del acuerdo BDI × Nominax (criterio legal, exclusión por RFC patronal, consentimiento,
   diccionario de datos con aviso previo, efecto contagio y plan de acción). Reglas en `nominax/rules.js`.
+- `sql/consultas_nominax_por_dia.sql`: consultas enviadas a Nominax por día (últimos 30 días), con prueba en
+  `tests/consultas_nominax.test.sql` (`psql -v ON_ERROR_STOP=1 -f tests/consultas_nominax.test.sql` en una base de prueba).
 - `docs/NOMINAX.md`: cómo cada punto del plan de acción se traduce en código.
 - `docs/ARQUITECTURA.md`: cómo pasar a una prueba con tarjeta real.
 - `tests/engine.test.js`: pruebas del motor.
