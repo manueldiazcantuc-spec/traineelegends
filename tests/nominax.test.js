@@ -81,4 +81,20 @@ s = fresh(R.CRITERIA.TRABAJADOR);
 R.ingest(s, rec(OTHER), D);
 assert.equal(s.log[0].type, "rechazo");
 
+// El lote da lo mismo que registro por registro
+s = fresh(R.CRITERIA.TRABAJADOR);
+R.grantConsent(s, "w1", D);
+R.excludeEmployer(s, OPP, D);
+const batch = [rec(OTHER), rec(OPP), { workerId: "w2", employerRfc: OTHER, data: {} }];
+assert.deepEqual(R.evaluateBatch(s, batch, D), batch.map((r) => R.evaluateRecord(s, r, D)));
+
+// El índice por RFC sigue funcionando tras recargar el estado (como desde localStorage)
+const reloaded = JSON.parse(JSON.stringify(s));
+assert.equal(R.findEmployer(reloaded, OPP.toLowerCase()).status, "excluido");
+assert.equal(R.findEmployer(reloaded, "constructor"), null);
+
+// La bitácora no crece sin límite
+for (let i = 0; i < R.MAX_LOG + 50; i++) R.ingest(s, rec(OTHER), D);
+assert.equal(s.log.length, R.MAX_LOG);
+
 console.log("ok · reglas Nominax");

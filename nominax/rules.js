@@ -27,6 +27,7 @@
   };
 
   var DAY = 86400000, HOUR = 3600000;
+  var MAX_LOG = 500; // la bitácora guarda solo los eventos más recientes
 
   function t(date) { return new Date(date).getTime(); }
   function iso(ms) { return new Date(ms).toISOString(); }
@@ -52,13 +53,26 @@
   function log(state, date, type, detail) {
     var e = { at: new Date(date).toISOString(), type: type, detail: detail };
     state.log.unshift(e);
+    if (state.log.length > MAX_LOG) state.log.length = MAX_LOG;
     return e;
   }
 
+  // Índice RFC → empresa, ligado al arreglo de empresas. No se guarda con el estado:
+  // si el estado se recarga (p. ej. desde localStorage), el índice se rehace solo.
+  var indexes = typeof WeakMap === "function" ? new WeakMap() : null;
+  function employerIndex(state) {
+    var idx = indexes && indexes.get(state.employers);
+    if (!idx) {
+      idx = {};
+      state.employers.forEach(function (e) { idx[e.rfc] = e; });
+      if (indexes) indexes.set(state.employers, idx);
+    }
+    return idx;
+  }
+
   function findEmployer(state, rfc) {
-    rfc = normalizeRFC(rfc);
-    for (var i = 0; i < state.employers.length; i++) if (state.employers[i].rfc === rfc) return state.employers[i];
-    return null;
+    var idx = employerIndex(state), key = normalizeRFC(rfc);
+    return Object.prototype.hasOwnProperty.call(idx, key) ? idx[key] : null;
   }
 
   /** Cambia el criterio legal. Solo Legal debería hacerlo: aquí queda registrado quién y cuándo. */
@@ -131,10 +145,13 @@
     return c;
   }
 
-  function hasConsent(state, workerId, date) {
+  // `nowIso` en formato toISOString: se compara como texto, sin volver a interpretar fechas.
+  function consentAt(state, workerId, nowIso) {
     var c = state.consents[workerId];
-    return !!(c && c.granted && t(c.at) <= t(date));
+    return !!(c && c.granted && c.at <= nowIso);
   }
+
+  function hasConsent(state, workerId, date) { return consentAt(state, workerId, iso(t(date))); }
 
   // ---------- Diccionario de datos ----------
 
@@ -174,17 +191,18 @@
 
   // ---------- Decisión por registro ----------
 
-  /**
-   * Decide si un registro de nómina puede usarse.
-   * record = { workerId, employerRfc, data: { campo: valor } }
-   * Devuelve { ok, reason, data, dropped, version }.
-   */
-  function evaluateRecord(state, record, date) {
+  /** Lo que no cambia entre registros del mismo momento: se calcula una vez por lote. */
+  function context(state, date) {
+    var ms = t(date);
+    return { iso: iso(ms), dict: activeDictionary(state, ms) };
+  }
+
+  function decide(state, record, ctx) {
     var out = { ok: false, reason: "", data: null, dropped: [], version: null };
     var emp = employerAllowed(state, findEmployer(state, record.employerRfc));
     if (!emp.ok) { out.reason = emp.reason; return out; }
-    if (!hasConsent(state, record.workerId, date)) { out.reason = "Sin consentimiento expreso del trabajador"; return out; }
-    var dict = activeDictionary(state, date);
+    if (!consentAt(state, record.workerId, ctx.iso)) { out.reason = "Sin consentimiento expreso del trabajador"; return out; }
+    var dict = ctx.dict;
     if (!dict) { out.reason = "Sin diccionario de datos vigente"; return out; }
     out.version = dict.version;
     out.data = {};
@@ -194,6 +212,19 @@
     });
     out.ok = true;
     return out;
+  }
+
+  /**
+   * Decide si un registro de nómina puede usarse.
+   * record = { workerId, employerRfc, data: { campo: valor } }
+   * Devuelve { ok, reason, data, dropped, version }.
+   */
+  function evaluateRecord(state, record, date) { return decide(state, record, context(state, date)); }
+
+  /** Igual que `evaluateRecord`, para un lote completo (p. ej. el envío diario de Nominax). */
+  function evaluateBatch(state, records, date) {
+    var ctx = context(state, date);
+    return records.map(function (r) { return decide(state, r, ctx); });
   }
 
   /** Aplica `evaluateRecord` y lo deja en la bitácora. */
@@ -233,7 +264,7 @@
     excludeEmployer: excludeEmployer, authorizeEmployer: authorizeEmployer, resetEmployer: resetEmployer, employerAllowed: employerAllowed,
     grantConsent: grantConsent, revokeConsent: revokeConsent, hasConsent: hasConsent,
     activeDictionary: activeDictionary, proposeDictionaryChange: proposeDictionaryChange, diffFields: diffFields,
-    evaluateRecord: evaluateRecord, ingest: ingest, coverage: coverage, contagion: contagion
+    evaluateRecord: evaluateRecord, evaluateBatch: evaluateBatch, MAX_LOG: MAX_LOG, ingest: ingest, coverage: coverage, contagion: contagion
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.NominaxRules = api;
