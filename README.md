@@ -13,8 +13,12 @@ aliada y regulada por la CNBV. Este repositorio sigue la
   - `provider.js`: proveedor de tarjeta simulado. Es la pieza que se reemplaza para la prueba real.
   - `partner.js`: casa de bolsa aliada simulada (contrato, órdenes, portafolios por perfil).
   - `app.js`, `app.css`: pantallas y estilos.
+- `nominax/`: consola interna del acuerdo BDI × Nominax (criterio legal, exclusión por RFC patronal, consentimiento,
+  diccionario de datos con aviso previo, efecto contagio y plan de acción). Reglas en `nominax/rules.js`.
+- `docs/NOMINAX.md`: cómo cada punto del plan de acción se traduce en código.
 - `docs/ARQUITECTURA.md`: cómo pasar a una prueba con tarjeta real.
 - `tests/engine.test.js`: pruebas del motor.
+- `tests/nominax.test.js`: pruebas de las reglas Nominax.
 
 ## Cómo verlo
 
@@ -23,6 +27,7 @@ En el MVP puedes registrarte paso a paso o cargar 6 semanas de datos de ejemplo.
 
 ```sh
 node tests/engine.test.js
+node tests/nominax.test.js
 ```
 
 Cifras de la calculadora y del fondo: hipotéticas. No es asesoría de inversión.

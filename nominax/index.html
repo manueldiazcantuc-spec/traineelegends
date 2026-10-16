@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consola Nominax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">BDI × Nominax · Plan de acción interno</p>
+    <h1>Consola del acuerdo</h1>
+    <p class="lead" id="objective"></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" aria-labelledby="h-criterio">
+    <div class="card-head">
+      <h2 id="h-criterio">Criterio de Legal</h2>
+      <span class="tag">Tema 1 y 3 · decide Legal</span>
+    </div>
+    <p class="muted">¿Basta el consentimiento del trabajador o debe autorizar el patrón? Mientras Legal no lo defina, no entra ningún dato.</p>
+    <div class="seg" role="radiogroup" aria-label="Criterio legal" id="criterion"></div>
+  </section>
+
+  <section class="grid-3" aria-label="Cobertura">
+    <div class="stat"><span class="muted">Base Nominax</span><b class="num" id="s-total">—</b><span class="small muted">trabajadores</span></div>
+    <div class="stat"><span class="muted">Alcance con el criterio vigente</span><b class="num" id="s-reach">—</b><span class="small muted" id="s-share">—</span></div>
+    <div class="stat"><span class="muted">Excluidos por RFC patronal</span><b class="num" id="s-excl">—</b><span class="small muted" id="s-wait">—</span></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-empresas">
+    <div class="card-head">
+      <h2 id="h-empresas">Clientes de Nominax</h2>
+      <span class="tag">Tech · exclusión por RFC</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Empresa</th><th>RFC patronal</th><th class="r">Trabajadores</th><th>Estado</th><th>Acción</th></tr></thead>
+        <tbody id="employers"></tbody>
+      </table>
+    </div>
+    <p class="small muted">Excluir bloquea los datos nuevos al instante; los ya recibidos se borran en <span id="purge-h"></span> h (plazo a confirmar con Tech). Empresas y RFC ficticios.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-contagio">
+    <div class="card-head">
+      <h2 id="h-contagio">Riesgo oculto: efecto contagio</h2>
+      <span class="tag warn">Directora / Comercial</span>
+    </div>
+    <p class="muted" id="hidden-risk"></p>
+    <div class="sliders">
+      <label>Clientes que piden lo mismo <b class="num" id="v-opp"></b>
+        <input type="range" id="r-opp" min="0" max="100" step="1" value="2"></label>
+      <label>Tasa de opt-in esperada <b class="num" id="v-opt"></b>
+        <input type="range" id="r-opt" min="5" max="100" step="5" value="40"></label>
+    </div>
+    <div class="bar" aria-hidden="true"><span class="bar-ok" id="bar-ok"></span><span class="bar-cons" id="bar-cons"></span></div>
+    <p class="small"><span class="key ok"></span>Alcanzables <b class="num" id="c-reach"></b> · <span class="key cons"></span>Con consentimiento <b class="num" id="c-cons"></b> · Perdidos <b class="num" id="c-lost"></b></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-sim">
+    <div class="card-head">
+      <h2 id="h-sim">Simular un registro de nómina</h2>
+      <span class="tag">Opt-in obligatorio</span>
+    </div>
+    <div class="form-row">
+      <label>Empresa<select id="sim-emp"></select></label>
+      <label>Trabajador<input id="sim-worker" value="TRAB-0001" autocomplete="off"></label>
+      <label class="check"><input type="checkbox" id="sim-consent"> Consentimiento expreso</label>
+      <button class="btn" id="sim-go">Enviar registro</button>
+    </div>
+    <p class="result" id="sim-out" role="status"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-dicc">
+    <div class="card-head">
+      <h2 id="h-dicc">Diccionario de datos</h2>
+      <span class="tag">Producto · aviso previo <span id="notice-d"></span> días</span>
+    </div>
+    <p class="muted">Vigente: <b id="dict-ver"></b>. Campos de ejemplo hasta que Producto confirme los exactos.</p>
+    <ul class="chips" id="dict-fields"></ul>
+    <h3>Nominax propone un cambio</h3>
+    <div class="form-row">
+      <label>Versión<input id="dc-ver" value="v2" autocomplete="off"></label>
+      <label class="grow">Campos (separados por coma)<input id="dc-fields" autocomplete="off"></label>
+      <label>Entra en vigor<input type="date" id="dc-date"></label>
+      <button class="btn" id="dc-go">Validar</button>
+    </div>
+    <p class="result" id="dc-out" role="status"></p>
+    <ul class="list" id="dict-history"></ul>
+  </section>
+
+  <section class="card" aria-labelledby="h-plan">
+    <div class="card-head">
+      <h2 id="h-plan">Orden y calendario</h2>
+      <span class="tag" id="progress"></span>
+    </div>
+    <div class="days" id="calendar"></div>
+    <h3>Reunir requerimientos</h3>
+    <ul class="checks" id="reqs"></ul>
+  </section>
+
+  <section class="card" aria-labelledby="h-temas">
+    <div class="card-head"><h2 id="h-temas">Qué necesito resolver y con quién</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Tema</th><th>Con quién</th><th>Qué necesito saber</th></tr></thead>
+        <tbody id="topics"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="grid-2">
+    <div class="card">
+      <h2>Preguntas para Rodrigo</h2>
+      <p class="small muted">No comprometen a BDI.</p>
+      <ol class="list" id="questions"></ol>
+    </div>
+    <div class="card">
+      <h2>Concesiones</h2>
+      <h3>Viables</h3><ul class="list" id="viable"></ul>
+      <h3>No negociables</h3><ul class="list" id="nonneg"></ul>
+    </div>
+    <div class="card">
+      <h2>Qué resuelvo yo</h2>
+      <ul class="list" id="iresolve"></ul>
+    </div>
+    <div class="card">
+      <h2>Qué escalo</h2>
+      <ul class="list" id="escalate"></ul>
+    </div>
+  </section>
+
+  <section class="card planb">
+    <span class="tag dark">Plan B</span>
+    <p id="planb"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-log">
+    <div class="card-head">
+      <h2 id="h-log">Bitácora</h2>
+      <button class="btn line" id="reset">Reiniciar demo</button>
+    </div>
+    <ol class="log" id="log"></ol>
+  </section>
+</main>
+
+<script src="rules.js"></script>
+<script src="plan.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
