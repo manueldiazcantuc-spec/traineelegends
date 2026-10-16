@@ -17,6 +17,8 @@ aliada y regulada por la CNBV. Este repositorio sigue la
   diccionario de datos con aviso previo, efecto contagio y plan de acción). Reglas en `nominax/rules.js`.
 - `sql/consultas_nominax_por_dia.sql`: consultas enviadas a Nominax por día (últimos 30 días), con prueba en
   `tests/consultas_nominax.test.sql` (`psql -v ON_ERROR_STOP=1 -f tests/consultas_nominax.test.sql` en una base de prueba).
+- `sql/demo/`: base ficticia del piloto (`esquema.sql`, `datos.sql`) para practicar el query en PostgreSQL.
+- `nominax/laboratorio.html`: laboratorio interactivo con esa base: cómo viaja una consulta por la API y el query paso a paso.
 - `docs/NOMINAX.md`: cómo cada punto del plan de acción se traduce en código.
 - `docs/ARQUITECTURA.md`: cómo pasar a una prueba con tarjeta real.
 - `tests/engine.test.js`: pruebas del motor.
