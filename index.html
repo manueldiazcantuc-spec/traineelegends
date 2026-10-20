@@ -34,16 +34,8 @@
   --step--1: 0.875rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.6rem; --step-3: 2.2rem; --step-4: clamp(2.6rem, 6vw, 4.6rem);
   --r: 14px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0A0C22; --surface: #12153A; --ink: #EEF0FF; --muted: #A3A8CC; --line: #262A5C;
-    --accent: #6F82FF; --accent-soft: #1C2160; --good: #3DD69A; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0A0C22; --surface: #12153A; --ink: #EEF0FF; --muted: #A3A8CC; --line: #262A5C;
-  --accent: #6F82FF; --accent-soft: #1C2160; --good: #3DD69A; color-scheme: dark;
-}
+/* Un solo tema claro a propósito: blanco de contraste con bandas azul noche. */
+:root { color-scheme: light; --c-in: #7586F5; --c-gr: #3F2FF0; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
@@ -130,6 +122,32 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .seg button { font: 600 var(--step--1)/1 var(--font-body); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
+/* Gráfica de crecimiento */
+.gc-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+.gc-k::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.gc-k-c::before { background: var(--c-in); }
+.gc-k-g::before { background: var(--c-gr); }
+.gc-wrap { position: relative; margin-top: 10px; }
+.gc-wrap svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.gc-grid { stroke: var(--line); stroke-width: 1; }
+.gc-base { stroke: var(--muted); }
+.gc-ax { fill: var(--muted); font: 500 11px var(--font-body); }
+.gc-area-c { fill: var(--c-in); }
+.gc-area-g { fill: var(--c-gr); }
+.gc-gap { fill: none; stroke: #FFFFFF; stroke-width: 2; }
+.gc-line { fill: none; stroke: var(--c-gr); stroke-width: 2; }
+.gc-dot { fill: var(--c-gr); stroke: #FFFFFF; stroke-width: 2; }
+.gc-goal { stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.gc-lbl { fill: var(--ink); font: 700 11px var(--font-body); }
+.gc-cross { stroke: var(--ink); stroke-width: 1; }
+.gc-tip { position: absolute; top: 4px; transform: translateX(-50%); background: #FFFFFF; color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 0.78rem; display: grid; gap: 2px; min-width: 150px; box-shadow: 0 8px 24px rgba(8,10,36,.14); pointer-events: none; }
+.gc-tip span { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+.gc-tip em { font-style: normal; font-weight: 700; color: var(--ink); font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.chart-card { background: #FFFFFF; border: 1px solid var(--line); border-radius: 22px; padding: clamp(18px, 3vw, 28px); margin-top: 24px; display: grid; gap: 6px; }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.chart-head h3 { font-size: var(--step-1); }
+.chart-head b { font: 600 var(--step-1)/1 var(--font-data); color: var(--accent); }
+
 /* Calculadora */
 .calc { background: var(--surface); border-block: 1px solid var(--line); }
 .calc-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(24px, 5vw, 64px); align-items: start; margin-top: 32px; }
@@ -181,7 +199,8 @@ td.us { font-weight: 600; }
 /* Datos */
 .data { background: var(--navy); color: #fff; }
 .data .eyebrow { color: var(--glow); }
-.figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 36px; }
+.figs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 36px; }
+@media (max-width: 1000px) { .figs { grid-template-columns: repeat(2, 1fr); } }
 .fig { display: grid; gap: 8px; border-top: 1px solid rgba(154,168,255,.25); padding-top: 18px; }
 .fig b { font: 700 clamp(2.6rem, 6vw, 3.6rem)/1 var(--font-display); letter-spacing: -0.03em; color: #8D9BFF; }
 .fig p { color: #C9CEF5; }
@@ -271,10 +290,10 @@ footer p { max-width: 70em; }
       <div class="steps">
         <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo apartar.</p></div>
         <div class="step"><h3>Elige tu porcentaje</h3><p>Del 1% al 10% de cada compra, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
-        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra suma su porcentaje al ahorro del día.</p></div>
+        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra aparta su porcentaje y se invierte al momento.</p></div>
         <div class="step final"><h3>Se invierte hacia tu meta</h3><p>En tu portafolio, con una casa de bolsa aliada. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
       </div>
-      <p class="batch-note">Juntamos lo apartado en el día y hacemos un solo cargo a tu débito por la noche. Así una compra no se vuelve diez cargos chiquitos en tu estado de cuenta.</p>
+      <p class="batch-note">Cada compra genera su propio cargo a tu débito por el porcentaje que elegiste, y ese mismo monto se invierte de inmediato en tu portafolio.</p>
     </div>
   </section>
 
@@ -285,7 +304,7 @@ footer p { max-width: 70em; }
       <p class="lede" style="margin-top:14px">Cresko es la app que convierte tus compras en inversión. El dinero se invierte y se guarda a tu nombre en casas de bolsa y operadoras de fondos reguladas por la CNBV con las que trabajamos.</p>
       <ol class="chain" aria-label="Recorrido de tu dinero">
         <li><b>Tu débito</b><span>Pagas como siempre</span></li>
-        <li><b>Cresko</b><span>Calcula tu porcentaje y junta lo del día</span></li>
+        <li><b>Cresko</b><span>Calcula tu porcentaje en cada compra y lo cobra</span></li>
         <li><b>Casa de bolsa aliada</b><span>Abre tu contrato, invierte y custodia</span></li>
         <li class="end"><b>Tu portafolio</b><span>A tu nombre, hacia tu meta</span></li>
       </ol>
@@ -325,9 +344,9 @@ footer p { max-width: 70em; }
             <small id="fee-ex">Con 3%, una compra de $200 aparta $6.</small>
           </div>
           <div class="ctl">
-            <div class="ctl-head"><label for="buys">Gasto mensual con débito</label><output id="buys-out" for="buys">$6,000</output></div>
-            <input id="buys" type="range" min="1000" max="30000" step="500" value="6000">
-            <small>Súper, comida, transporte: todo lo que pagas con tu tarjeta de débito.</small>
+            <div class="ctl-head"><label for="buys">Gasto mensual con débito</label><output id="buys-out" for="buys">$5,000</output></div>
+            <input id="buys" type="range" min="1000" max="30000" step="500" value="5000">
+            <small>Promedio estimado en México: unas 12 compras al mes de ~$430, alrededor de $5,000 al mes.</small>
           </div>
           <div class="ctl">
             <div class="ctl-head"><span style="font-weight:600" id="prof-lbl">Portafolio</span><output id="prof-out">9% anual</output></div>
@@ -338,23 +357,30 @@ footer p { max-width: 70em; }
             </div>
           </div>
           <div class="ctl">
-            <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">5 años</output></div>
-            <input id="years" type="range" min="1" max="15" step="1" value="5">
+            <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">15 años</output></div>
+            <input id="years" type="range" min="1" max="30" step="1" value="15">
           </div>
         </div>
         <div class="result" aria-live="polite">
           <div>
             <small style="color:#9AA0D0">Al mes apartas</small>
-            <div class="big" id="r-month">$180 <span>MXN</span></div>
+            <div class="big" id="r-month">$150 <span>MXN</span></div>
           </div>
           <div class="kpis">
             <div class="kpi"><small>En un año</small><b id="r-year">$1,800</b></div>
             <div class="kpi"><small id="r-label">En 5 años, con rendimiento</small><b id="r-fv">$10,900</b></div>
           </div>
-          <div class="bar" role="img" id="r-bar" aria-label="Proporción entre lo aportado y el rendimiento"><i class="in" id="b-in" style="width:80%"></i><i class="gr" id="b-gr" style="width:20%"></i></div>
-          <div class="legend"><span id="l-in">Aportado $9,000</span><span class="g" id="l-gr">Rendimiento $1,900</span></div>
+          <div class="kpis">
+            <div class="kpi"><small>Aportaste</small><b id="r-paid">$27,000</b></div>
+            <div class="kpi"><small>Ganó el interés compuesto</small><b id="r-gr" style="color:#9EF0C8">$29,000</b></div>
+          </div>
           <p class="fine" id="r-fine">Ejemplo hipotético con 9% anual compuesto cada mes, antes de comisiones e impuestos. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
         </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><h3>Así crece tu dinero con el interés compuesto</h3><b id="r-share">52% es rendimiento</b></div>
+        <p style="color:var(--muted);font-size:var(--step--1)">Al principio casi todo es lo que aportas. Con los años, los rendimientos generan sus propios rendimientos y la curva se acelera. Pasa el cursor para ver cada año.</p>
+        <div id="growth"></div>
       </div>
     </div>
   </section>
@@ -373,7 +399,7 @@ footer p { max-width: 70em; }
             <tr><th scope="row">Compra de $87.50</th><td>Aparta $2.50</td><td class="us">Con 3%: $2.63</td></tr>
             <tr><th scope="row">Compra de $1,200.00</th><td>Aparta $0</td><td class="us">Con 3%: $36.00</td></tr>
             <tr><th scope="row">Al mes</th><td>Difícil de predecir</td><td class="us">% de tu gasto con débito, con tope</td></tr>
-            <tr><th scope="row">Destino</th><td>Casi siempre un depósito</td><td class="us">Fondo indexado hacia tu meta</td></tr>
+            <tr><th scope="row">Destino</th><td>Casi siempre un depósito</td><td class="us">Tu portafolio en una casa de bolsa aliada</td></tr>
           </tbody>
         </table>
       </div>
@@ -420,6 +446,7 @@ footer p { max-width: 70em; }
       <div class="figs">
         <div class="fig"><b>71%</b><p>de las compras con tarjeta se hacen con débito.</p><small>Banxico, noviembre 2024</small></div>
         <div class="fig"><b>8%</b><p>de los adultos ahorra solo en instrumentos formales.</p><small>ENIF 2024, INEGI y CNBV</small></div>
+        <div class="fig"><b>~$5 mil</b><p>gasta al mes con débito, en promedio, quien tiene tarjeta: unas 12 compras de ~$430.</p><small>Estimación con Banxico 2025 y ENIF 2024</small></div>
         <div class="fig"><b>31</b><p>fintechs de gestión patrimonial en México: un segmento poco poblado.</p><small>Finnovista Fintech Radar México 2025</small></div>
       </div>
     </div>
@@ -464,7 +491,7 @@ footer p { max-width: 70em; }
       <span class="eyebrow">Preguntas frecuentes</span>
       <h2 id="h-faq" style="margin-top:12px">Lo que nos preguntan</h2>
       <div class="faq">
-        <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Cresko lee tus compras y hace un cargo diario con la suma de lo apartado.</p></details>
+        <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Por cada compra, Cresko hace un cargo por tu porcentaje y lo invierte.</p></details>
         <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges 3% y un tope de $300, nunca apartarás más de $300 en el mes, aunque gastes $20,000.</p></details>
         <details><summary>¿Puedo sacar mi dinero?</summary><p>Sí. Puedes retirar tu inversión a tu cuenta cuando quieras. El fondo puede valer más o menos que lo que aportaste, según el mercado.</p></details>
         <details><summary>¿Quién guarda mi dinero?</summary><p>Una casa de bolsa u operadora de fondos regulada por la CNBV con la que Cresko tiene un convenio. Tu inversión está en un contrato a tu nombre; Cresko es la app que te ayuda a ahorrar e invertir.</p></details>
@@ -479,10 +506,11 @@ footer p { max-width: 70em; }
   <div class="wrap">
     <a class="brand" href="#inicio"><img src="assets/logo-mark.svg" alt="" style="width:26px;height:26px">cresko</a>
     <p>Cresko Smart Savings es un prototipo en validación. Las cifras de la calculadora son hipotéticas y no constituyen asesoría de inversión. La inversión se realizará a través de casas de bolsa u operadoras de fondos autorizadas por la CNBV con las que Cresko tenga un convenio comercial.</p>
-    <p>Datos: ENIF 2024 (INEGI y CNBV); Banxico vía Expansión; Finnovista Fintech Radar México 2025.</p>
+    <p>Datos: ENIF 2024 (INEGI y CNBV); Banxico vía Expansión; Finnovista Fintech Radar México 2025. El gasto promedio con débito es una estimación propia con pagos con tarjeta de Banxico 2025 (11,261 millones de pagos, 72% con débito, $6.44 billones) y tenencia de débito de la ENIF 2024.</p>
   </div>
 </footer>
 
+<script src="assets/growth-chart.js"></script>
 <script>
 (function () {
   var mxn = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
@@ -502,12 +530,14 @@ footer p { max-width: 70em; }
     $("r-year").textContent = mxn.format(month * 12);
     $("r-label").textContent = "En " + years + (years === 1 ? " año" : " años") + ", con rendimiento";
     $("r-fv").textContent = mxn.format(fv);
-    var pin = paid / fv * 100;
-    $("b-in").style.width = pin + "%";
-    $("b-gr").style.width = (100 - pin) + "%";
-    $("l-in").textContent = "Aportado " + mxn.format(paid);
-    $("l-gr").textContent = "Rendimiento " + mxn.format(growth);
+    $("r-paid").textContent = mxn.format(paid);
+    $("r-gr").textContent = mxn.format(growth);
+    $("r-share").textContent = Math.round(growth / fv * 100) + "% es rendimiento";
+    last = { monthly: month, rate: RATE, years: years };
+    CreskoChart.render($("growth"), last);
   }
+  var last;
+  window.addEventListener("resize", function () { if (last) CreskoChart.render($("growth"), last); });
   ["fee", "buys", "years"].forEach(function (id) { $(id).addEventListener("input", calc); });
   document.querySelectorAll(".seg button").forEach(function (b) {
     b.addEventListener("click", function () {

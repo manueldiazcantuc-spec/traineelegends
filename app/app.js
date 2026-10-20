@@ -3,6 +3,7 @@
  *
  * Pantallas: bienvenida → meta → perfil de inversión → porcentaje → vincular tarjeta → confirmar → app.
  * Cresko es wealthtech: el dinero se invierte en una casa de bolsa aliada (partner.js).
+ * Cada compra genera su propio cargo a la tarjeta y su propia orden de inversión.
  * El estado vive en localStorage para que la demo sobreviva a una recarga.
  */
 (function () {
@@ -10,12 +11,13 @@
 
   var E = window.CreskoEngine;
   var KEY = "cresko.mvp.v1";
-  var SPENDS = [3000, 6000, 10000, 15000]; // gasto mensual con débito para proyectar
+  // Gasto mensual con débito. Promedio estimado en México: ~$5,000 en ~12 compras de ~$430
+  // (Banxico 2025: 11,261 M de pagos con tarjeta, 72% débito, $6.44 billones; ENIF 2024).
+  var SPENDS = [3000, 5000, 8000, 12000];
   var PCTS = [1, 2, 3, 5, 10];
   var PORTS = window.CreskoPartner.PORTFOLIOS;
   var MIX_COLORS = { "Deuda gubernamental": "#9AA8FF", "Acciones México": "#3F58FD", "Acciones globales": "#3525F7", "Acciones indexadas": "#3F58FD" };
   function rate(profile) { return PORTS[profile || state.profile].mu; }
-  var CHARGE_HOUR = 23;
 
   var GOALS = {
     viaje: { label: "Viaje", name: "Viaje a Oaxaca", target: 15000, hint: "Vacaciones, boletos" },
@@ -60,14 +62,14 @@
   function fresh() {
     var c = startClock();
     return {
-      v: 3, stage: "welcome", tab: "inicio", userName: "", spend: 6000, profile: "moderado", contract: null,
-      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, pct: 3, spend: 6000, cap: 300, minPurchase: 20, q1: "espero", q2: "1a3", profile: "moderado", bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
+      v: 4, stage: "welcome", tab: "inicio", userName: "", spend: 5000, profile: "moderado", contract: null,
+      draft: { goalKind: "viaje", goalName: GOALS.viaje.name, target: GOALS.viaje.target, pct: 3, spend: 5000, cap: 300, minPurchase: 20, q1: "espero", q2: "1a3", profile: "moderado", bank: "BBVA", last4: "", holder: "", readConsent: false, feeConsent: false },
       linkStep: -1, goal: null, rules: Object.assign({}, E.DEFAULT_RULES), card: null, consent: null,
       txs: [], charges: [], units: 0, contributed: 0, nav: 100, navHistory: [{ d: c, nav: 100 }],
       clock: c, logs: [], confirmUnlink: false, isExample: false
     };
   }
-  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 3 ? s : null; } catch (e) { return null; } }
+  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 4 ? s : null; } catch (e) { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
   var state = load() || fresh();
@@ -86,9 +88,13 @@
   var partner = new window.CreskoPartner.MockInvestmentPartner(log);
   provider.onTransaction(function (tx) {
     var rec = E.applyPurchase(state, tx);
-    if (rec.status === "pendiente") log("motor", "apartado +" + m2(rec.fee) + (rec.reason ? " (" + rec.reason.toLowerCase() + ")" : ""), { pendiente_hoy: m2(E.pendingTotal(state)) });
-    else log("motor", "sin apartado: " + rec.reason.toLowerCase());
-    if (!quiet) toast(rec.status === "pendiente" ? rec.merchant + " " + m2(rec.amount) + " · +" + m2(rec.fee) + " a " + state.goal.name : rec.merchant + " " + m2(rec.amount) + " · " + rec.reason);
+    if (rec.status !== "pendiente") { log("motor", "sin apartado: " + rec.reason.toLowerCase()); if (!quiet) toast(rec.merchant + " " + m2(rec.amount) + " · " + rec.reason); return; }
+    log("motor", "apartado " + pc(state.rules.pct) + " = " + m2(rec.fee) + (rec.reason ? " (" + rec.reason.toLowerCase() + ")" : ""));
+    var res = provider.charge(state.card.cardId, rec.fee, rand);
+    var ch = E.settle(state, res, state.nav, tx.date);
+    if (ch.status === "invertido") { partner.buy(state.contract, state.profile, ch.amount, state.nav); log("motor", "unidades acreditadas", { unidades: ch.units.toFixed(4) }); }
+    else log("motor", "cargo rechazado: no se invierte; se avisa al usuario");
+    if (!quiet) toast(ch.status === "invertido" ? rec.merchant + " " + m2(rec.amount) + " · +" + m2(rec.fee) + " invertido en " + state.goal.name : "Tu banco rechazó el cargo de " + m2(rec.fee) + ". No se invirtió.");
   });
 
   /* ---------- Reloj simulado ---------- */
@@ -104,16 +110,7 @@
   }
 
   function endOfDay() {
-    var d = new Date(state.clock); d.setHours(CHARGE_HOUR, 0, 0, 0);
-    state.clock = d.toISOString();
-    var total = E.pendingTotal(state);
-    if (total > 0 && state.card) {
-      log("motor", "cierre del día: cargo agrupado", { compras: E.pending(state).length, total: m2(total) });
-      var res = provider.charge(state.card.cardId, total, rand);
-      var ch = E.settle(state, res, state.nav, state.clock);
-      if (ch.status === "invertido") { partner.buy(state.contract, state.profile, ch.amount, state.nav); log("motor", "unidades acreditadas", { unidades: ch.units.toFixed(4) }); }
-      else log("motor", "cargo rechazado: no se invierte; se avisa al usuario");
-    }
+    var d = new Date(state.clock);
     var n = new Date(d); n.setDate(n.getDate() + 1); n.setHours(8, Math.floor(rand() * 50), 0, 0);
     state.nav = E.nextNav(state.nav, rand, PORTS[state.profile].mu, PORTS[state.profile].sigma);
     state.clock = n.toISOString();
@@ -122,7 +119,8 @@
   }
 
   function advanceDay() {
-    var r = rand(), k = r < 0.15 ? 0 : r < 0.55 ? 1 : r < 0.85 ? 2 : 3;
+    // ~12 compras al mes, el promedio estimado en México
+    var r = rand(), k = r < 0.65 ? 0 : r < 0.9 ? 1 : 2;
     for (var i = 0; i < k; i++) buy();
     endOfDay();
   }
@@ -135,7 +133,7 @@
     state.userName = "Ana";
     state.goal = { kind: "viaje", name: "Viaje a Oaxaca", target: 15000 };
     state.rules = { pct: 3, cap: 300, minPurchase: 20, paused: false };
-    state.spend = 6000;
+    state.spend = 5000;
     state.profile = "moderado"; state.contract = "48210042";
     state.card = { cardId: "card_demo", bank: "BBVA", last4: "4821", holder: "Ana López", status: "activa", linkedAt: state.clock };
     state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
@@ -150,11 +148,16 @@
 
   /* ---------- Derivados ---------- */
 
+  function investedToday() {
+    var k = E.dayKey(state.clock);
+    return E.round2(state.charges.reduce(function (s, c) { return c.status === "invertido" && E.dayKey(c.date) === k ? s + c.amount : s; }, 0));
+  }
+
   function value() { return E.portfolioValue(state, state.nav); }
   function expectedMonthly(rules, spend) { return E.monthlyContribution(rules, spend == null ? state.spend : spend); }
   function consentText(r, card, profile) {
     return "Acepto que Cresko cargue a mi tarjeta ···· " + card.last4 + " el " + pc(r.pct) + " de cada compra" +
-      (r.minPurchase ? " de " + m0(r.minPurchase) + " o más" : "") + ", hasta " + m0(r.cap) + " al mes, en un solo cargo diario, y lo invierta a mi nombre en el portafolio " + PORTS[profile || state.profile].name + " a través de la casa de bolsa aliada. Puedo pausar o cancelar en cualquier momento.";
+      (r.minPurchase ? " de " + m0(r.minPurchase) + " o más" : "") + ", hasta " + m0(r.cap) + " al mes, con un cargo por cada compra, y lo invierta a mi nombre en el portafolio " + PORTS[profile || state.profile].name + " a través de la casa de bolsa aliada. Puedo pausar o cancelar en cualquier momento.";
   }
 
   /* ---------- Render ---------- */
@@ -238,7 +241,7 @@
         '<div class="field"><label for="i-min">No apartar en compras menores a</label><select id="i-min" data-bind="draft.minPurchase" data-num="1">' +
           [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (d.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
         '<div class="field"><label for="i-spend">¿Cuánto gastas al mes con tu débito?</label><select id="i-spend" data-bind="draft.spend" data-num="1">' +
-          SPENDS.map(function (v) { return '<option value="' + v + '"' + (d.spend === v ? " selected" : "") + ">Unos " + m0(v) + "</option>"; }).join("") + "</select></div>" +
+          SPENDS.map(function (v) { return '<option value="' + v + '"' + (d.spend === v ? " selected" : "") + ">Unos " + m0(v) + "</option>"; }).join("") + '</select><small class="muted">En México el promedio es de unos $5,000 al mes con débito.</small></div>' +
         '<div class="projection"><small>Gastando ' + m0(d.spend) + ' al mes apartarías</small><b>' + m0(mo) + ' al mes</b>' +
           '<small>Llegarías a ' + m0(d.target) + ' en <span class="num">' + months(n) + "</span>*</small></div>" +
         '<p class="muted small">*Hipotético, con ' + Math.round(rate(d.profile) * 100) + '% anual de ' + PORTS[d.profile].name + '. Tu inversión puede subir o bajar.</p>' +
@@ -281,7 +284,7 @@
           "<div><dt>De cada compra</dt><dd>" + pc(d.pct) + "</dd></div>" +
           "<div><dt>Tope mensual</dt><dd>" + m0(d.cap) + "</dd></div>" +
           "<div><dt>Compras mínimas</dt><dd>" + (d.minPurchase ? m0(d.minPurchase) : "Todas") + "</dd></div>" +
-          "<div><dt>Cobro</dt><dd>Un cargo al día, 23:00</dd></div>" +
+          "<div><dt>Cobro</dt><dd>Un cargo por cada compra</dd></div>" +
           "<div><dt>Portafolio</dt><dd>" + PORTS[d.profile].name + "</dd></div>" +
           "<div><dt>Custodia</dt><dd>Casa de bolsa aliada" + (state.pendingContract ? " · ···· " + esc(state.pendingContract.slice(-4)) : "") + "</dd></div>" +
         "</dl>" +
@@ -302,7 +305,7 @@
       return '<div class="hello"><div><span class="muted small">' + esc(fDay.format(new Date(state.clock))) + "</span><h2>Hola, " + esc(state.userName || "") + "</h2></div>" + status + "</div>" +
         (state.isExample ? '<span class="pill info" style="justify-self:start">Datos de ejemplo</span>' : "") +
         '<div class="goal-card"><div><small>' + esc(g.name) + '</small><div class="val">' + m2(v) + '</div><div class="sub">de ' + m0(g.target) + " · " + (isFinite(n) ? "llegas en ~" + months(n) : "en pausa") + "</div></div>" + ring + "</div>" +
-        '<div class="card stack"><div class="today"><div><span class="muted small">Apartado hoy</span><br><b>' + m2(E.pendingTotal(state)) + '</b></div><span class="pill info">Se cobra a las 23:00</span></div>' +
+        '<div class="card stack"><div class="today"><div><span class="muted small">Invertido hoy</span><br><b>' + m2(investedToday()) + '</b></div><span class="pill info">Se invierte en cada compra</span></div>' +
           '<div><div class="today small"><span class="muted">Este mes</span><span class="num">' + m0(monthUsed) + " de " + m0(state.rules.cap) + '</span></div><div style="height:6px;border-radius:6px;background:var(--line);margin-top:6px;overflow:hidden"><div style="height:100%;width:' + Math.min(100, monthUsed / state.rules.cap * 100) + '%;background:var(--accent)"></div></div></div></div>' +
         '<div class="section-title"><h3>Últimos movimientos</h3>' + (state.txs.length ? '<button class="link" data-act="tab" data-tab="movimientos">Ver todo</button>' : "") + "</div>" +
         (state.txs.length ? '<div class="tx-list">' + state.txs.slice(0, 5).map(txRow).join("") + "</div>"
@@ -313,11 +316,9 @@
       if (!state.txs.length) return '<h2>Movimientos</h2><div class="empty"><p>Aún no hay compras con tu tarjeta ···· ' + esc(state.card.last4) + ".</p></div>";
       var byDay = {}, order = [];
       state.txs.forEach(function (t) { var k = E.dayKey(t.date); if (!byDay[k]) { byDay[k] = []; order.push(k); } byDay[k].push(t); });
-      var chargesByDay = {};
-      state.charges.forEach(function (c) { chargesByDay[E.dayKey(c.date)] = c; });
       var html = order.slice(0, 30).map(function (k) {
-        var c = chargesByDay[k];
-        var cRow = c ? '<div class="charge-row' + (c.status === "rechazado" ? " bad" : "") + '"><span>' + (c.status === "invertido" ? "Cargo del día · invertido" : "Cargo rechazado por el banco") + '</span><b class="num">' + m2(c.amount) + "</b></div>" : "";
+        var inv = E.round2(byDay[k].reduce(function (s, t) { return t.status === "cobrado" ? s + t.fee : s; }, 0));
+        var cRow = inv && byDay[k].length > 1 ? '<div class="charge-row"><span>Invertido este día</span><b class="num">' + m2(inv) + "</b></div>" : "";
         return '<div class="day-head">' + esc(fDay.format(new Date(byDay[k][0].date))) + "</div>" + cRow + '<div class="tx-list">' + byDay[k].map(txRow).join("") + "</div>";
       }).join("");
       return "<h2>Movimientos</h2>" + html;
@@ -329,6 +330,7 @@
         (state.isExample ? '<span class="pill info" style="justify-self:start">Datos de ejemplo · rendimiento simulado</span>' : "") +
         '<div class="card stack"><span class="muted small">Valor de tu inversión</span><b style="font:700 2rem/1 var(--font-display);letter-spacing:-.02em">' + m2(v) + "</b>" +
           '<span class="pill ' + (gain >= 0 ? "good" : "warn") + '" style="justify-self:start">' + (gain >= 0 ? "+" : "") + m2(gain) + " (" + pct.toFixed(2) + "%)</span>" + spark() + "</div>" +
+        '<div class="card stack"><b>Tu proyección</b><p class="muted small">Con ~' + m0(expectedMonthly(state.rules)) + ' al mes en ' + PORTS[state.profile].name + ' (' + Math.round(rate() * 100) + '% anual hipotético). Fíjate cómo se acelera.</p><div id="proj"></div></div>' +
         '<div class="kpi-row"><div class="card kpi"><small>Aportado</small><b>' + m2(state.contributed) + '</b></div><div class="card kpi"><small>Unidades</small><b>' + state.units.toFixed(4) + "</b></div>" +
           '<div class="card kpi"><small>Precio por unidad</small><b>' + m2(state.nav) + '</b></div><div class="card kpi"><small>Cargos invertidos</small><b>' + state.charges.filter(function (c) { return c.status === "invertido"; }).length + "</b></div></div>" +
         '<div class="card stack"><div class="port-head"><b>' + PORTS[state.profile].name + '</b><span class="pill off">' + PORTS[state.profile].risk + "</span></div>" + mixBar(PORTS[state.profile]) +
@@ -419,6 +421,13 @@
     document.getElementById("log").innerHTML = state.logs.length
       ? state.logs.map(function (l) { return '<div><span class="t">' + esc(fTime.format(new Date(l.t))) + '</span> <span class="k-' + esc(l.k) + '">[' + esc(l.k) + "]</span> " + esc(l.msg) + "</div>"; }).join("")
       : '<div class="t">Sin eventos todavía. Completa el registro o carga el ejemplo.</div>';
+    var proj = document.getElementById("proj");
+    if (proj) {
+      var mo = state.rules.paused ? 0 : expectedMonthly(state.rules);
+      var n = E.monthsToGoal(value(), mo, state.goal.target, rate());
+      var yrs = Math.max(10, Math.min(30, isFinite(n) ? Math.ceil(n / 12) + 2 : 10));
+      window.CreskoChart.render(proj, { monthly: mo, rate: rate(), years: yrs, start: value(), goal: state.goal.target, height: 220 });
+    }
     validate();
     save();
   }

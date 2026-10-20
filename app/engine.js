@@ -65,7 +65,8 @@
   function pendingTotal(state) { return round2(pending(state).reduce(function (s, t) { return s + t.fee; }, 0)); }
 
   /**
-   * Cierra el lote: un solo cargo por la suma de pendientes, invertido a `nav`.
+   * Cobra los apartados pendientes y los invierte a `nav`. En el MVP se llama
+   * en cada compra, así que cada cargo corresponde a una sola transacción.
    * `chargeResult` viene del proveedor de pagos ({ id, status }).
    */
   function settle(state, chargeResult, nav, date) {

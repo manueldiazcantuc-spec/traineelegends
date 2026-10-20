@@ -20,12 +20,27 @@ Captura de compras: propuesta 3 (ruta C del análisis), **vincular la tarjeta de
 
 1. **El banco avisa.** El agregador envía un webhook `transaction.created` con monto, comercio y fecha.
 2. **El motor decide.** `evaluatePurchase()` calcula el porcentaje de la compra (`feeFor()`) y aplica la compra mínima, la pausa y el tope mensual.
-3. **Un cargo al día.** A las 23:00 `settle()` suma los pendientes y hace **un solo cargo** a la tarjeta tokenizada.
+3. **Un cargo por transacción.** En cuanto llega la compra, `settle()` hace un cargo a la tarjeta tokenizada
+   por el porcentaje de esa compra.
 4. **Se invierte con el socio.** El cargo aprobado se transfiere (SPEI) a la cuenta concentradora del socio y se envía
    una orden de compra del portafolio del usuario en su contrato. Un cargo rechazado no invierte y se avisa al usuario.
 
-El cargo agrupado no es opcional: cobrar por separado el 3% de cada compra (unos $2 a $6 en compras típicas) costaría más en comisiones del procesador
-(típicamente un porcentaje más una cuota fija por transacción) que el propio apartado.
+### Costo del cargo por transacción (validar antes del piloto)
+
+Con el gasto promedio estimado (12 compras de ~$430 al mes) y 3%, cada cargo es de ~$13. Con una tarifa típica de
+procesador en línea (porcentaje + cuota fija de unos $3 por cargo), el costo sería ~25% del monto. Opciones a negociar:
+tarifa de adquirente sin cuota fija, cargo mínimo por transacción, o domiciliación/SPEI en lugar de cargo a tarjeta.
+El motor ya permite volver a cobro agrupado sin cambios: basta con llamar `settle()` al cierre del día.
+
+## Gasto promedio con débito (supuesto del modelo)
+
+| Dato | Valor | Fuente |
+|---|---|---|
+| Pagos con tarjeta 2025 | 11,261 millones, 72% con débito | Banxico vía Expansión |
+| Monto pagado con tarjeta 2025 | $6.44 billones | Banxico vía Expansión |
+| Ticket promedio con débito | ~$430 (estimado: crédito ≈ 2.2× débito, como en Buen Fin 2021: $1,304 vs $599) | cálculo propio |
+| Adultos con débito | 62.8% de 18 a 70 años (~56 M) | ENIF 2024 |
+| **Por persona con débito** | **~12 compras y ~$5,000 al mes** | cálculo propio |
 
 ## Interfaces
 
