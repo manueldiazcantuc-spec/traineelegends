@@ -1,8 +1,8 @@
 /*
  * Cresko · motor de reglas
  *
- * Lógica pura, sin DOM ni red. Aparta un porcentaje de cada compra,
- * agrupa los apartados del día en un solo cargo y convierte ese cargo en
+ * Lógica pura, sin DOM ni red. Calcula cuánto se invierte de cada compra,
+ * hace el cargo y convierte ese cargo en
  * unidades del fondo. Es la misma lógica que correrá en el backend cuando
  * conectemos una tarjeta real, por eso no depende del navegador.
  */
@@ -10,9 +10,9 @@
   "use strict";
 
   var DEFAULT_RULES = {
-    pct: 3,          // % de cada compra que se aparta
+    pct: 3,          // % de cada compra que se invierte
     cap: 300,        // tope mensual en MXN
-    minPurchase: 20, // compras menores no generan apartado
+    minPurchase: 20, // compras menores no generan inversión
     paused: false
   };
 
@@ -23,7 +23,7 @@
   function dayKey(date) { var d = new Date(date); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
   function monthKey(date) { return dayKey(date).slice(0, 7); }
 
-  /** Suma de apartados (pendientes y cobrados) del mes de `date`. */
+  /** Suma invertida (pendiente y cobrada) del mes de `date`. */
   function monthTotal(state, date) {
     var m = monthKey(date);
     return round2(state.txs.reduce(function (s, t) {
@@ -31,17 +31,17 @@
     }, 0));
   }
 
-  /** Apartado de una compra: su porcentaje, redondeado a centavos. */
+  /** Monto a invertir de una compra: su porcentaje, redondeado a centavos. */
   function feeFor(rules, amount) { return round2(amount * rules.pct / 100); }
 
   /**
-   * Decide el apartado de una compra.
+   * Decide cuánto se invierte de una compra.
    * Devuelve { fee, status: "pendiente" | "omitido", reason }.
    */
   function evaluatePurchase(state, tx) {
     var r = state.rules;
     if (!state.card || state.card.status !== "activa") return { fee: 0, status: "omitido", reason: "Tarjeta no vinculada" };
-    if (r.paused) return { fee: 0, status: "omitido", reason: "Apartados en pausa" };
+    if (r.paused) return { fee: 0, status: "omitido", reason: "Inversión en pausa" };
     if (tx.amount < r.minPurchase) return { fee: 0, status: "omitido", reason: "Menor a $" + r.minPurchase };
     var room = round2(r.cap - monthTotal(state, tx.date));
     if (room <= 0) return { fee: 0, status: "omitido", reason: "Tope mensual alcanzado" };
@@ -65,7 +65,7 @@
   function pendingTotal(state) { return round2(pending(state).reduce(function (s, t) { return s + t.fee; }, 0)); }
 
   /**
-   * Cobra los apartados pendientes y los invierte a `nav`. En el MVP se llama
+   * Cobra los montos pendientes y los invierte a `nav`. En el MVP se llama
    * en cada compra, así que cada cargo corresponde a una sola transacción.
    * `chargeResult` viene del proveedor de pagos ({ id, status }).
    */

@@ -16,7 +16,6 @@
   var SPENDS = [3000, 5000, 8000, 12000];
   var PCTS = [1, 2, 3, 5, 10];
   var PORTS = window.CreskoPartner.PORTFOLIOS;
-  var MIX_COLORS = { "Deuda gubernamental": "#9AA8FF", "Acciones México": "#3F58FD", "Acciones globales": "#3525F7", "Acciones indexadas": "#3F58FD" };
   function rate(profile) { return PORTS[profile || state.profile].mu; }
 
   var GOALS = {
@@ -88,8 +87,8 @@
   var partner = new window.CreskoPartner.MockInvestmentPartner(log);
   provider.onTransaction(function (tx) {
     var rec = E.applyPurchase(state, tx);
-    if (rec.status !== "pendiente") { log("motor", "sin apartado: " + rec.reason.toLowerCase()); if (!quiet) toast(rec.merchant + " " + m2(rec.amount) + " · " + rec.reason); return; }
-    log("motor", "apartado " + pc(state.rules.pct) + " = " + m2(rec.fee) + (rec.reason ? " (" + rec.reason.toLowerCase() + ")" : ""));
+    if (rec.status !== "pendiente") { log("motor", "sin inversión: " + rec.reason.toLowerCase()); if (!quiet) toast(rec.merchant + " " + m2(rec.amount) + " · " + rec.reason); return; }
+    log("motor", "inversión " + pc(state.rules.pct) + " = " + m2(rec.fee) + (rec.reason ? " (" + rec.reason.toLowerCase() + ")" : ""));
     var res = provider.charge(state.card.cardId, rec.fee, rand);
     var ch = E.settle(state, res, state.nav, tx.date);
     if (ch.status === "invertido") { partner.buy(state.contract, state.profile, ch.amount, state.nav); log("motor", "unidades acreditadas", { unidades: ch.units.toFixed(4) }); }
@@ -182,7 +181,7 @@
       return '<div class="welcome">' +
         '<img src="../assets/mascota.webp" alt="Mascota de Cresko">' +
         '<h1>Cada vez que pagas, creces.</h1>' +
-        '<p>Apartamos un porcentaje de cada compra con tu débito y lo invertimos hacia tu meta.</p>' +
+        '<p>Invertimos un porcentaje de cada compra con tu débito, a tu nombre, hacia tu meta.</p>' +
         '<div class="spacer"></div>' +
         '<div class="stack"><button class="btn btn-primary block" data-act="go" data-to="goal">Crear mi cuenta</button>' +
         '<button class="btn btn-line block" data-act="example">Ver con datos de ejemplo</button></div></div>';
@@ -194,7 +193,7 @@
         return '<button class="choice" data-act="goal-kind" data-kind="' + k + '" aria-pressed="' + (d.goalKind === k) + '">' + icon(k) + "<b>" + GOALS[k].label + "</b><small>" + GOALS[k].hint + "</small></button>";
       }).join("");
       return header(1, "welcome") +
-        '<div class="stack"><span class="eyebrow">Tu meta</span><h2>¿Para qué quieres ahorrar?</h2></div>' +
+        '<div class="stack"><span class="eyebrow">Tu meta</span><h2>¿Para qué quieres invertir?</h2></div>' +
         '<div class="choice-grid">' + choices + "</div>" +
         '<div class="field"><label for="i-user">¿Cómo te llamas?</label><input id="i-user" data-bind="userName" autocomplete="given-name" value="' + esc(state.userName) + '" placeholder="Tu nombre"></div>' +
         '<div class="field"><label for="i-gname">Nombre de la meta</label><input id="i-gname" data-bind="draft.goalName" value="' + esc(d.goalName) + '"></div>' +
@@ -235,14 +234,14 @@
         }).join("") + "</div>";
       }
       return header(3, "perfil") +
-        '<div class="stack"><span class="eyebrow">Tu porcentaje</span><h2>¿Qué porcentaje apartamos de cada compra?</h2><p class="muted small">Ahorras en proporción a lo que gastas. Lo puedes ajustar cuando quieras.</p></div>' +
-        '<div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + '<small class="muted">Con ' + pc(d.pct) + ", una compra de $200 aparta " + m2(E.feeFor({ pct: d.pct }, 200)) + ".</small></div>" +
-        '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + '<small class="muted">Al llegar al tope dejamos de apartar hasta el siguiente mes.</small></div>' +
-        '<div class="field"><label for="i-min">No apartar en compras menores a</label><select id="i-min" data-bind="draft.minPurchase" data-num="1">' +
-          [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (d.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
+        '<div class="stack"><span class="eyebrow">Tu porcentaje</span><h2>¿Qué porcentaje invertimos de cada compra?</h2><p class="muted small">Inviertes en proporción a lo que gastas. Lo puedes ajustar cuando quieras.</p></div>' +
+        '<div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + '<small class="muted">Con ' + pc(d.pct) + ", una compra de $430 (el ticket promedio con débito) invierte " + m2(E.feeFor({ pct: d.pct }, 430)) + ".</small></div>" +
+        '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + '<small class="muted">Al llegar al tope dejamos de invertir hasta el siguiente mes.</small></div>' +
+        '<div class="field"><label for="i-min">No invertir en compras menores a</label><select id="i-min" data-bind="draft.minPurchase" data-num="1">' +
+          [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (d.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Invertir en todas") + "</option>"; }).join("") + "</select></div>" +
         '<div class="field"><label for="i-spend">¿Cuánto gastas al mes con tu débito?</label><select id="i-spend" data-bind="draft.spend" data-num="1">' +
           SPENDS.map(function (v) { return '<option value="' + v + '"' + (d.spend === v ? " selected" : "") + ">Unos " + m0(v) + "</option>"; }).join("") + '</select><small class="muted">En México el promedio es de unos $5,000 al mes con débito.</small></div>' +
-        '<div class="projection"><small>Gastando ' + m0(d.spend) + ' al mes apartarías</small><b>' + m0(mo) + ' al mes</b>' +
+        '<div class="projection"><small>Gastando ' + m0(d.spend) + ' al mes invertirías</small><b>' + m0(mo) + ' al mes</b>' +
           '<small>Llegarías a ' + m0(d.target) + ' en <span class="num">' + months(n) + "</span>*</small></div>" +
         '<p class="muted small">*Hipotético, con ' + Math.round(rate(d.profile) * 100) + '% anual de ' + PORTS[d.profile].name + '. Tu inversión puede subir o bajar.</p>' +
         '<button class="btn btn-primary block" data-act="go" data-to="card">Continuar</button>';
@@ -254,7 +253,7 @@
         return '<button class="bank" data-act="bank" data-bank="' + esc(b) + '" aria-pressed="' + (d.bank === b) + '">' + esc(b) + "</button>";
       }).join("");
       return header(4, "rules") +
-        '<div class="stack"><span class="eyebrow">Tu tarjeta</span><h2>Vincula tu débito de siempre</h2><p class="muted small">No cambias de banco ni de tarjeta. Solo leemos tus compras para saber cuándo apartar.</p></div>' +
+        '<div class="stack"><span class="eyebrow">Tu tarjeta</span><h2>Vincula tu débito de siempre</h2><p class="muted small">No cambias de banco ni de tarjeta. Solo leemos tus compras para saber cuándo invertir.</p></div>' +
         '<div class="field"><span class="lbl">Banco</span><div class="bank-grid">' + banks + "</div></div>" +
         '<div class="field"><label for="i-last4">Últimos 4 dígitos de la tarjeta</label><input id="i-last4" class="big" inputmode="numeric" maxlength="4" placeholder="0000" data-bind="draft.last4" value="' + esc(d.last4) + '"></div>' +
         '<div class="field"><label for="i-holder">Nombre del titular</label><input id="i-holder" autocomplete="cc-name" data-bind="draft.holder" value="' + esc(d.holder) + '" placeholder="Como aparece en la tarjeta"></div>' +
@@ -306,10 +305,10 @@
         (state.isExample ? '<span class="pill info" style="justify-self:start">Datos de ejemplo</span>' : "") +
         '<div class="goal-card"><div><small>' + esc(g.name) + '</small><div class="val">' + m2(v) + '</div><div class="sub">de ' + m0(g.target) + " · " + (isFinite(n) ? "llegas en ~" + months(n) : "en pausa") + "</div></div>" + ring + "</div>" +
         '<div class="card stack"><div class="today"><div><span class="muted small">Invertido hoy</span><br><b>' + m2(investedToday()) + '</b></div><span class="pill info">Se invierte en cada compra</span></div>' +
-          '<div><div class="today small"><span class="muted">Este mes</span><span class="num">' + m0(monthUsed) + " de " + m0(state.rules.cap) + '</span></div><div style="height:6px;border-radius:6px;background:var(--line);margin-top:6px;overflow:hidden"><div style="height:100%;width:' + Math.min(100, monthUsed / state.rules.cap * 100) + '%;background:var(--accent)"></div></div></div></div>' +
+          '<div class="stack" style="gap:6px"><div class="today small"><span class="muted">Este mes, de tu tope</span><span class="num">' + m0(monthUsed) + " de " + m0(state.rules.cap) + " (" + Math.round(Math.min(100, monthUsed / state.rules.cap * 100)) + '%)</span></div><div class="meter"><i style="width:' + Math.min(100, monthUsed / state.rules.cap * 100).toFixed(1) + '%"></i></div></div></div>' +
         '<div class="section-title"><h3>Últimos movimientos</h3>' + (state.txs.length ? '<button class="link" data-act="tab" data-tab="movimientos">Ver todo</button>' : "") + "</div>" +
         (state.txs.length ? '<div class="tx-list">' + state.txs.slice(0, 5).map(txRow).join("") + "</div>"
-          : '<div class="empty"><p>Paga con tu débito y aquí verás cada apartado.</p><p class="small">En la demo, usa <b>Simular compra</b> en el panel del piloto.</p></div>');
+          : '<div class="empty"><p>Paga con tu débito y aquí verás cada inversión.</p><p class="small">En la demo, usa <b>Simular compra</b> en el panel del piloto.</p></div>');
     },
 
     movimientos: function () {
@@ -334,7 +333,7 @@
         '<div class="kpi-row"><div class="card kpi"><small>Aportado</small><b>' + m2(state.contributed) + '</b></div><div class="card kpi"><small>Unidades</small><b>' + state.units.toFixed(4) + "</b></div>" +
           '<div class="card kpi"><small>Precio por unidad</small><b>' + m2(state.nav) + '</b></div><div class="card kpi"><small>Cargos invertidos</small><b>' + state.charges.filter(function (c) { return c.status === "invertido"; }).length + "</b></div></div>" +
         '<div class="card stack"><div class="port-head"><b>' + PORTS[state.profile].name + '</b><span class="pill off">' + PORTS[state.profile].risk + "</span></div>" + mixBar(PORTS[state.profile]) +
-          '<span class="small muted">Comisión total estimada: ' + PORTS[state.profile].fee.toFixed(1) + "% anual sobre lo invertido.</span></div>" +
+          '</div>' +
         '<div class="card stack"><b>Dónde está tu dinero</b><p class="muted small">A tu nombre, en tu contrato de la casa de bolsa aliada, regulada por la CNBV. Cresko no custodia tu dinero: te ayuda a invertirlo.</p><span class="small">Contrato <span class="num">···· ' + esc((state.contract || "").slice(-4)) + "</span></span></div>";
     },
 
@@ -345,10 +344,10 @@
       }
       var linked = state.card.status === "activa";
       return "<h2>Ajustes</h2>" +
-        '<div class="card toggle"><div><b>Apartados activos</b><br><span class="muted small">' + (r.paused ? "En pausa: tus compras no generan apartados." : "Cada compra aparta el " + pc(r.pct) + ".") + '</span></div><button class="switch" role="switch" aria-label="Apartados activos" aria-checked="' + !r.paused + '" data-act="pause"' + (linked ? "" : " disabled") + "></button></div>" +
+        '<div class="card toggle"><div><b>Inversión activa</b><br><span class="muted small">' + (r.paused ? "En pausa: tus compras no generan inversión." : "Cada compra invierte el " + pc(r.pct) + ".") + '</span></div><button class="switch" role="switch" aria-label="Inversión activa" aria-checked="' + !r.paused + '" data-act="pause"' + (linked ? "" : " disabled") + "></button></div>" +
         '<div class="card stack"><div class="field"><span class="lbl">De cada compra</span>' + chips("pct", PCTS, pc) + "</div>" +
           '<div class="field"><span class="lbl">Tope mensual</span>' + chips("cap", [150, 300, 600, 1000], m0) + "</div>" +
-          '<div class="field"><label for="i-rmin">No apartar en compras menores a</label><select id="i-rmin" data-act-change="rule-min">' + [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (r.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Apartar en todas") + "</option>"; }).join("") + "</select></div>" +
+          '<div class="field"><label for="i-rmin">No invertir en compras menores a</label><select id="i-rmin" data-act-change="rule-min">' + [0, 20, 50, 100].map(function (v) { return '<option value="' + v + '"' + (r.minPurchase === v ? " selected" : "") + ">" + (v ? m0(v) : "Invertir en todas") + "</option>"; }).join("") + "</select></div>" +
           '<p class="muted small">Los cambios aplican desde tu siguiente compra.</p></div>' +
         '<div class="card stack"><div class="field"><span class="lbl">Perfil de inversión</span><div class="chips">' + Object.keys(PORTS).map(function (k) { return '<button class="chip" style="font-family:var(--font-body);font-size:.85rem" data-act="profile" data-profile="' + k + '" aria-pressed="' + (state.profile === k) + '">' + PORTS[k].name.replace("Cresko ", "") + "</button>"; }).join("") + '</div></div><p class="muted small">Si cambias de perfil, la casa de bolsa rebalancea tu inversión al siguiente día hábil.</p></div>' +
         '<div class="card stack"><b>Tarjeta</b><span class="muted small">' + esc(state.card.bank) + " ···· " + esc(state.card.last4) + " · " + esc(state.card.holder) + "</span>" +
@@ -366,10 +365,7 @@
     return score >= 4 ? "crecimiento" : "moderado";
   }
 
-  function mixBar(p) {
-    return '<div class="mix"><div class="mix-bar">' + p.mix.map(function (m) { return '<i style="width:' + m[1] + "%;background:" + MIX_COLORS[m[0]] + '"></i>'; }).join("") + "</div>" +
-      '<div class="mix-leg">' + p.mix.map(function (m) { return '<span style="--c:' + MIX_COLORS[m[0]] + '">' + m[0] + " " + m[1] + "%</span>"; }).join("") + "</div></div>";
-  }
+  function mixBar(p) { return window.CreskoPartner.detailHTML(p); }
 
   function txRow(t) {
     var pill = t.status === "cobrado" ? '<span class="pill good">Invertido</span>' : t.status === "pendiente" ? '<span class="pill info">Por cobrar</span>' : '<span class="pill off" title="' + esc(t.reason) + '">' + esc(t.reason) + "</span>";
@@ -457,7 +453,7 @@
   $screen.addEventListener("change", function (e) {
     var el = e.target;
     if (el.getAttribute("data-bind") === "draft.minPurchase" || el.getAttribute("data-bind") === "draft.spend") { setPath(el.getAttribute("data-bind"), +el.value); render(); }
-    if (el.getAttribute("data-act-change") === "rule-min") { state.rules.minPurchase = +el.value; log("evento", "reglas actualizadas", { minimo: m0(+el.value) }); toast("Listo: compras menores a " + m0(+el.value) + " ya no apartan."); render(); }
+    if (el.getAttribute("data-act-change") === "rule-min") { state.rules.minPurchase = +el.value; log("evento", "reglas actualizadas", { minimo: m0(+el.value) }); toast("Listo: compras menores a " + m0(+el.value) + " ya no invierten."); render(); }
   });
 
   function onClick(e) {
@@ -488,15 +484,15 @@
       case "activate": activate(); break;
       case "pause":
         state.rules.paused = !state.rules.paused;
-        log("evento", state.rules.paused ? "apartados en pausa" : "apartados reactivados");
-        toast(state.rules.paused ? "Pausamos tus apartados." : "Tus apartados están activos otra vez.");
+        log("evento", state.rules.paused ? "inversión en pausa" : "inversión reactivada");
+        toast(state.rules.paused ? "Pausamos tu inversión." : "Tu inversión está activa otra vez.");
         break;
       case "rule":
         var f = b.getAttribute("data-field"), val = +b.getAttribute("data-val");
         state.rules[f] = val;
         state.consent = { acceptedAt: state.clock, text: consentText(state.rules, state.card) };
         log("evento", "reglas actualizadas y nueva autorización registrada", (function () { var o = {}; o[f === "pct" ? "porcentaje" : "tope"] = f === "pct" ? pc(val) : m0(val); return o; })());
-        toast(f === "pct" ? "Ahora apartamos el " + pc(val) + " de cada compra." : "Tu tope mensual es " + m0(val) + ".");
+        toast(f === "pct" ? "Ahora invertimos el " + pc(val) + " de cada compra." : "Tu tope mensual es " + m0(val) + ".");
         break;
       case "unlink-ask": state.confirmUnlink = true; break;
       case "unlink-cancel": state.confirmUnlink = false; break;

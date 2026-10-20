@@ -1,0 +1,36 @@
+/* Cresko · barras de portafolio y sliders (compartido por el sitio y el MVP) */
+
+/* Composición: una barra por clase de activo, todas sobre la misma escala de 0 a 100% */
+.alloc { display: grid; gap: 8px; }
+.alloc-row { display: grid; grid-template-columns: minmax(0, 11em) 1fr 3.2em; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--muted); }
+.alloc-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.alloc-track { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.alloc-track i { display: block; height: 100%; border-radius: 999px; }
+.alloc-row b { text-align: right; color: var(--ink); font-family: var(--font-data); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* Rango típico de un año sobre una escala común (−20% a +40%) para comparar riesgo */
+.prange { display: grid; gap: 6px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.prange-head, .prange-foot { display: flex; justify-content: space-between; gap: 10px; font-size: 0.78rem; color: var(--muted); }
+.prange-head b, .prange-foot b { color: var(--ink); font-family: var(--font-data); font-variant-numeric: tabular-nums; font-weight: 600; }
+.prange-track { position: relative; height: 14px; border-radius: 999px; background: var(--line); }
+.prange-zero { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); border-radius: 2px; }
+.prange-band { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: linear-gradient(90deg, #9AA8FF, #3F58FD 50%, #2414B8); }
+.prange-mu { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #FFFFFF; border: 3px solid var(--ink); box-sizing: border-box; }
+.prange-scale { position: relative; height: 14px; font-size: 0.7rem; color: var(--muted); font-family: var(--font-data); }
+.prange-scale span { position: absolute; transform: translateX(-50%); }
+.prange-scale span:first-child { left: 0; transform: none; }
+.prange-scale span:last-child { right: 0; transform: none; }
+
+/* Sliders con relleno: la parte azul es el valor elegido */
+input[type=range].slider { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; --p: 50%; cursor: pointer; }
+input[type=range].slider:focus-visible { outline: 3px solid var(--glow); outline-offset: 4px; border-radius: 8px; }
+input[type=range].slider::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #3F58FD 0, #3525F7 var(--p), var(--line) var(--p)); }
+input[type=range].slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%; background: #FFFFFF; border: 3px solid #3F58FD; box-shadow: 0 2px 8px rgba(8,10,36,.2); }
+input[type=range].slider::-moz-range-track { height: 8px; border-radius: 999px; background: var(--line); }
+input[type=range].slider::-moz-range-progress { height: 8px; border-radius: 999px; background: #3F58FD; }
+input[type=range].slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; border: 3px solid #3F58FD; box-shadow: 0 2px 8px rgba(8,10,36,.2); }
+.scale { display: flex; justify-content: space-between; font: 500 0.72rem/1 var(--font-data); color: var(--muted); margin-top: -2px; }
+
+/* Barra de progreso (tope mensual, meta) */
+.meter { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #3F58FD, #3525F7); }

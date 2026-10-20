@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cresko Smart Savings</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Cresko aparta un porcentaje que tú eliges de cada compra con débito y lo invierte en un fondo indexado hacia tu meta.">
+<meta name="description" content="Cresko invierte un porcentaje que tú eliges de cada compra con débito en un portafolio a tu nombre, hacia tu meta.">
 <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/portfolio.css">
 <style>
 /* Layout: banda nocturna con la mascota como tesis, luego secciones claras en una retícula de 12 columnas; la calculadora es el momento interactivo. */
 :root {
@@ -27,7 +28,6 @@
   --accent-soft: #E8EBFF;
   --on-accent: #FFFFFF;
   --good: #11865B;
-  --mix-1: #9AA8FF; --mix-2: #3F58FD; --mix-3: #3525F7;
   --font-display: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -113,10 +113,7 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .port { border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 10px; align-content: start; background: var(--paper); min-width: 0; }
 .port-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .port p { color: var(--muted); font-size: var(--step--1); }
-.port small { color: var(--muted); font-size: 0.78rem; }
 .tag { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
-.mixbar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; }
-.mixbar i { display: block; height: 100%; }
 @media (max-width: 860px) { .ports { grid-template-columns: 1fr; } }
 .seg { display: flex; flex-wrap: wrap; gap: 8px; }
 .seg button { font: 600 var(--step--1)/1 var(--font-body); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
@@ -157,7 +154,6 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .ctl label { font-weight: 600; }
 .ctl output { font: 500 var(--step-1)/1 var(--font-data); color: var(--accent); font-variant-numeric: tabular-nums; }
 .ctl small { color: var(--muted); font-size: var(--step--1); }
-input[type=range] { width: 100%; accent-color: var(--blue); height: 28px; }
 .result { background: var(--navy); color: #fff; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: grid; gap: 22px; min-width: 0; }
 .result .big { font: 700 clamp(2.6rem, 7vw, 4rem)/1 var(--font-display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .result .big span { font-size: 0.4em; color: var(--glow); font-weight: 500; letter-spacing: 0; }
@@ -258,9 +254,9 @@ footer p { max-width: 70em; }
   <section class="hero" aria-labelledby="h-hero">
     <div class="wrap">
       <div class="hero-copy">
-        <span class="eyebrow">Wealthtech · Ahorro e inversión automática</span>
+        <span class="eyebrow">Wealthtech · Inversión automática en cada compra</span>
         <h1 id="h-hero">Cada vez que pagas, <em>creces.</em></h1>
-        <p>Cresko aparta un porcentaje que tú eliges de cada compra con tu tarjeta de débito y lo invierte, a tu nombre, en un portafolio de una casa de bolsa regulada. Sigues usando tu banco y tu tarjeta de siempre.</p>
+        <p>Cresko invierte un porcentaje que tú eliges de cada compra con tu tarjeta de débito, a tu nombre, en un portafolio de una casa de bolsa regulada. Sigues usando tu banco y tu tarjeta de siempre.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="app/index.html">Probar el prototipo</a>
           <a class="btn btn-ghost" href="#lista">Unirme a la lista de espera</a>
@@ -272,7 +268,7 @@ footer p { max-width: 70em; }
         <div class="ping" aria-hidden="true">
           <small>Débito ···· 4821 · OXXO</small>
           <b>Compra de $87.50</b>
-          <span class="amt">3% · +$2.63 a tu viaje</span>
+          <span class="amt">+$2.63 invertidos (3%)</span>
         </div>
         <div class="ping two" aria-hidden="true">
           <small>Meta · Fondo de emergencia</small>
@@ -286,11 +282,11 @@ footer p { max-width: 70em; }
   <section id="como-funciona" aria-labelledby="h-how">
     <div class="wrap">
       <span class="eyebrow">Cómo funciona</span>
-      <h2 id="h-how" style="margin-top:12px">Ahorras sin decidir cada día</h2>
+      <h2 id="h-how" style="margin-top:12px">Inviertes sin decidir cada día</h2>
       <div class="steps">
-        <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo apartar.</p></div>
+        <div class="step"><h3>Vincula tu débito</h3><p>Conectas la tarjeta que ya usas. Cresko solo lee tus compras para saber cuándo invertir.</p></div>
         <div class="step"><h3>Elige tu porcentaje</h3><p>Del 1% al 10% de cada compra, con un tope mensual. Lo aceptas una vez y lo cambias cuando quieras.</p></div>
-        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra aparta su porcentaje y se invierte al momento.</p></div>
+        <div class="step"><h3>Paga como siempre</h3><p>Súper, transporte, comida. Cada compra invierte su porcentaje al momento.</p></div>
         <div class="step final"><h3>Se invierte hacia tu meta</h3><p>En tu portafolio, con una casa de bolsa aliada. Ves tu avance hacia el viaje, el enganche o el retiro.</p></div>
       </div>
       <p class="batch-note">Cada compra genera su propio cargo a tu débito por el porcentaje que elegiste, y ese mismo monto se invierte de inmediato en tu portafolio.</p>
@@ -308,62 +304,46 @@ footer p { max-width: 70em; }
         <li><b>Casa de bolsa aliada</b><span>Abre tu contrato, invierte y custodia</span></li>
         <li class="end"><b>Tu portafolio</b><span>A tu nombre, hacia tu meta</span></li>
       </ol>
-      <div class="ports">
-        <div class="port">
-          <div class="port-top"><h3>Conservador</h3><span class="tag">Riesgo bajo</span></div>
-          <p>Para metas de menos de un año o si no quieres ver bajas grandes.</p>
-          <div class="mixbar"><i style="width:80%;background:var(--mix-1)"></i><i style="width:20%;background:var(--mix-2)"></i></div>
-          <small>80% deuda gubernamental · 20% acciones indexadas</small>
-        </div>
-        <div class="port">
-          <div class="port-top"><h3>Moderado</h3><span class="tag">Riesgo medio</span></div>
-          <p>Equilibrio entre estabilidad y crecimiento para metas de 1 a 3 años.</p>
-          <div class="mixbar"><i style="width:50%;background:var(--mix-1)"></i><i style="width:20%;background:var(--mix-2)"></i><i style="width:30%;background:var(--mix-3)"></i></div>
-          <small>50% deuda · 20% acciones México · 30% acciones globales</small>
-        </div>
-        <div class="port">
-          <div class="port-top"><h3>Crecimiento</h3><span class="tag">Riesgo alto</span></div>
-          <p>Para metas de más de 3 años, como el retiro. Sube y baja más.</p>
-          <div class="mixbar"><i style="width:15%;background:var(--mix-1)"></i><i style="width:30%;background:var(--mix-2)"></i><i style="width:55%;background:var(--mix-3)"></i></div>
-          <small>15% deuda · 30% acciones México · 55% acciones globales</small>
-        </div>
-      </div>
-      <p class="batch-note">Un cuestionario de dos preguntas te recomienda un perfil. Puedes cambiarlo cuando quieras y la casa de bolsa rebalancea tu inversión.</p>
+      <div class="ports" id="ports"></div>
+      <p class="batch-note">El rendimiento esperado es el promedio de cada clase de activo según su peso (deuda gubernamental 7%, acciones México 11%, acciones globales 12% anual, supuestos hipotéticos). El rango típico cubre 19 de cada 20 años. Un cuestionario de dos preguntas te recomienda un perfil y puedes cambiarlo cuando quieras.</p>
     </div>
   </section>
 
   <section id="calculadora" aria-labelledby="h-calc">
     <div class="wrap">
       <span class="eyebrow">Calculadora</span>
-      <h2 id="h-calc" style="margin-top:12px">¿Cuánto juntarías sin notarlo?</h2>
+      <h2 id="h-calc" style="margin-top:12px">¿Cuánto invertirías sin notarlo?</h2>
       <div class="calc-grid">
         <div class="controls">
           <div class="ctl">
             <div class="ctl-head"><label for="fee">Porcentaje de cada compra</label><output id="fee-out" for="fee">3%</output></div>
-            <input id="fee" type="range" min="1" max="10" step="1" value="3">
-            <small id="fee-ex">Con 3%, una compra de $200 aparta $6.</small>
+            <input id="fee" class="slider" type="range" min="1" max="10" step="1" value="3">
+            <div class="scale" aria-hidden="true"><span>1%</span><span>5%</span><span>10%</span></div>
+            <small id="fee-ex">Con 3%, una compra de $430 (el ticket promedio con débito) invierte $12.90.</small>
           </div>
           <div class="ctl">
             <div class="ctl-head"><label for="buys">Gasto mensual con débito</label><output id="buys-out" for="buys">$5,000</output></div>
-            <input id="buys" type="range" min="1000" max="30000" step="500" value="5000">
+            <input id="buys" class="slider" type="range" min="1000" max="30000" step="500" value="5000">
+            <div class="scale" aria-hidden="true"><span>$1,000</span><span>$15,000</span><span>$30,000</span></div>
             <small>Promedio estimado en México: unas 12 compras al mes de ~$430, alrededor de $5,000 al mes.</small>
           </div>
           <div class="ctl">
             <div class="ctl-head"><span style="font-weight:600" id="prof-lbl">Portafolio</span><output id="prof-out">9% anual</output></div>
             <div class="seg" role="group" aria-labelledby="prof-lbl">
-              <button type="button" data-rate="0.07" aria-pressed="false">Conservador</button>
-              <button type="button" data-rate="0.09" aria-pressed="true">Moderado</button>
-              <button type="button" data-rate="0.11" aria-pressed="false">Crecimiento</button>
+              <button type="button" data-p="conservador" aria-pressed="false">Conservador</button>
+              <button type="button" data-p="moderado" aria-pressed="true">Moderado</button>
+              <button type="button" data-p="crecimiento" aria-pressed="false">Crecimiento</button>
             </div>
           </div>
           <div class="ctl">
             <div class="ctl-head"><label for="years">Plazo</label><output id="years-out" for="years">15 años</output></div>
-            <input id="years" type="range" min="1" max="30" step="1" value="15">
+            <input id="years" class="slider" type="range" min="1" max="30" step="1" value="15">
+            <div class="scale" aria-hidden="true"><span>1 año</span><span>15</span><span>30 años</span></div>
           </div>
         </div>
         <div class="result" aria-live="polite">
           <div>
-            <small style="color:#9AA0D0">Al mes apartas</small>
+            <small style="color:#9AA0D0">Al mes inviertes</small>
             <div class="big" id="r-month">$150 <span>MXN</span></div>
           </div>
           <div class="kpis">
@@ -374,11 +354,11 @@ footer p { max-width: 70em; }
             <div class="kpi"><small>Aportaste</small><b id="r-paid">$27,000</b></div>
             <div class="kpi"><small>Ganó el interés compuesto</small><b id="r-gr" style="color:#9EF0C8">$29,000</b></div>
           </div>
-          <p class="fine" id="r-fine">Ejemplo hipotético con 9% anual compuesto cada mes, antes de comisiones e impuestos. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
+          <p class="fine" id="r-fine">Ejemplo hipotético con 9% anual compuesto cada mes, antes de comisiones e impuestos. Supuestos: deuda gubernamental 7%, acciones México 11% y acciones globales 12% anual. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.</p>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><h3>Así crece tu dinero con el interés compuesto</h3><b id="r-share">52% es rendimiento</b></div>
+        <div class="chart-head"><h3>Así crece tu dinero con el interés compuesto</h3><b id="r-share">52% del total es rendimiento</b></div>
         <p style="color:var(--muted);font-size:var(--step--1)">Al principio casi todo es lo que aportas. Con los años, los rendimientos generan sus propios rendimientos y la curva se acelera. Pasa el cursor para ver cada año.</p>
         <div id="growth"></div>
       </div>
@@ -389,15 +369,15 @@ footer p { max-width: 70em; }
     <div class="wrap split">
       <div style="display:grid;gap:16px">
         <span class="eyebrow">Porcentaje, no redondeo</span>
-        <h2 id="h-vs">Ahorras en proporción a lo que gastas</h2>
-        <p class="lede">Las apps de redondeo apartan lo que falta para el siguiente peso cerrado, así que una compra grande puede no apartar nada. En Cresko cada compra aparta el porcentaje que elegiste, con un tope mensual que no se rebasa.</p>
+        <h2 id="h-vs">Inviertes en proporción a lo que gastas</h2>
+        <p class="lede">Las apps de redondeo guardan lo que falta para el siguiente peso cerrado, así que una compra grande puede no sumar nada. En Cresko cada compra invierte el porcentaje que elegiste, con un tope mensual que no se rebasa.</p>
       </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th scope="col"></th><th scope="col">Redondeo</th><th scope="col" class="us">Cresko</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Compra de $87.50</th><td>Aparta $2.50</td><td class="us">Con 3%: $2.63</td></tr>
-            <tr><th scope="row">Compra de $1,200.00</th><td>Aparta $0</td><td class="us">Con 3%: $36.00</td></tr>
+            <tr><th scope="row">Compra de $87.50</th><td>Guarda $2.50</td><td class="us">Invierte $2.63 (3%)</td></tr>
+            <tr><th scope="row">Compra de $1,200.00</th><td>Guarda $0</td><td class="us">Invierte $36.00 (3%)</td></tr>
             <tr><th scope="row">Al mes</th><td>Difícil de predecir</td><td class="us">% de tu gasto con débito, con tope</td></tr>
             <tr><th scope="row">Destino</th><td>Casi siempre un depósito</td><td class="us">Tu portafolio en una casa de bolsa aliada</td></tr>
           </tbody>
@@ -413,15 +393,15 @@ footer p { max-width: 70em; }
       <div class="trust">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
-          <h3>Aceptas el porcentaje expresamente</h3><p>Nada se aparta sin que confirmes el porcentaje, el tope y la tarjeta.</p>
+          <h3>Aceptas el porcentaje expresamente</h3><p>Nada se invierte sin que confirmes el porcentaje, el tope y la tarjeta.</p>
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18h16M7 14V9m5 5V6m5 8v-3"/></svg>
-          <h3>Tope mensual</h3><p>Al llegar a tu tope, Cresko deja de apartar hasta el siguiente mes.</p>
+          <h3>Tope mensual</h3><p>Al llegar a tu tope, Cresko deja de invertir hasta el siguiente mes.</p>
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
-          <h3>Pausa o cancela al instante</h3><p>Un botón pausa los apartados. Otro desvincula la tarjeta.</p>
+          <h3>Pausa o cancela al instante</h3><p>Un botón pausa la inversión. Otro desvincula la tarjeta.</p>
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg>
@@ -469,7 +449,7 @@ footer p { max-width: 70em; }
         <div class="field"><label for="w-bank">Banco de tu débito principal</label>
           <select id="w-bank" name="bank"><option>BBVA</option><option>Banorte</option><option>Santander</option><option>Banamex</option><option>Nu</option><option>Mercado Pago</option><option>HSBC</option><option>Otro</option></select></div>
         <fieldset class="field" style="border:0;padding:0;margin:0">
-          <legend style="font-weight:600;font-size:var(--step--1);margin-bottom:6px">¿Qué porcentaje apartarías de cada compra?</legend>
+          <legend style="font-weight:600;font-size:var(--step--1);margin-bottom:6px">¿Qué porcentaje invertirías de cada compra?</legend>
           <div class="chips">
             <input type="radio" name="fee" id="f1" value="1"><label for="f1">1%</label>
             <input type="radio" name="fee" id="f2" value="2"><label for="f2">2%</label>
@@ -492,7 +472,7 @@ footer p { max-width: 70em; }
       <h2 id="h-faq" style="margin-top:12px">Lo que nos preguntan</h2>
       <div class="faq">
         <details><summary>¿Tengo que cambiar de banco o de tarjeta?</summary><p>No. Vinculas la tarjeta de débito que ya usas y sigues pagando igual. Por cada compra, Cresko hace un cargo por tu porcentaje y lo invierte.</p></details>
-        <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges 3% y un tope de $300, nunca apartarás más de $300 en el mes, aunque gastes $20,000.</p></details>
+        <details><summary>¿Qué pasa si un mes gasto mucho?</summary><p>El tope mensual te protege. Si eliges 3% y un tope de $300, nunca invertirás más de $300 en el mes, aunque gastes $20,000.</p></details>
         <details><summary>¿Puedo sacar mi dinero?</summary><p>Sí. Puedes retirar tu inversión a tu cuenta cuando quieras. El fondo puede valer más o menos que lo que aportaste, según el mercado.</p></details>
         <details><summary>¿Quién guarda mi dinero?</summary><p>Una casa de bolsa u operadora de fondos regulada por la CNBV con la que Cresko tiene un convenio. Tu inversión está en un contrato a tu nombre; Cresko es la app que te ayuda a ahorrar e invertir.</p></details>
         <details><summary>¿Cuánto cuesta?</summary><p>Una comisión anual sobre lo invertido, cercana a 1%, que incluye el costo del fondo. La confirmaremos en el piloto y te la diremos antes de que actives nada.</p></details>
@@ -511,11 +491,20 @@ footer p { max-width: 70em; }
 </footer>
 
 <script src="assets/growth-chart.js"></script>
+<script src="app/partner.js"></script>
 <script>
 (function () {
   var mxn = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
   var $ = function (id) { return document.getElementById(id); };
-  var RATE = 0.09;
+  var PORTS = CreskoPartner.PORTFOLIOS;
+  var RATE = PORTS.moderado.mu;
+  function pctTxt(x) { return Math.round(x * 100) + "%"; }
+  $("ports").innerHTML = ["conservador", "moderado", "crecimiento"].map(function (k) {
+    var p = PORTS[k];
+    return '<div class="port"><div class="port-top"><h3>' + p.name.replace("Cresko ", "") + '</h3><span class="tag">' + p.risk + "</span></div><p>" + p.blurb + "</p>" + CreskoPartner.detailHTML(p) + "</div>";
+  }).join("");
+  function fill(el) { el.style.setProperty("--p", ((el.value - el.min) / (el.max - el.min) * 100) + "%"); }
+  document.querySelectorAll("input.slider").forEach(function (el) { fill(el); el.addEventListener("input", function () { fill(el); }); });
 
   function calc() {
     var pct = +$("fee").value, spend = +$("buys").value, years = +$("years").value;
@@ -523,7 +512,7 @@ footer p { max-width: 70em; }
     var fv = month * ((Math.pow(1 + i, n) - 1) / i);
     var paid = month * n, growth = fv - paid;
     $("fee-out").textContent = pct + "%";
-    $("fee-ex").textContent = "Con " + pct + "%, una compra de $200 aparta " + mxn.format(2 * pct) + ".";
+    $("fee-ex").textContent = "Con " + pct + "%, una compra de $430 (el ticket promedio con débito) invierte " + new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(4.3 * pct) + ".";
     $("buys-out").textContent = mxn.format(spend);
     $("years-out").textContent = years + (years === 1 ? " año" : " años");
     $("r-month").firstChild.nodeValue = mxn.format(month) + " ";
@@ -532,7 +521,7 @@ footer p { max-width: 70em; }
     $("r-fv").textContent = mxn.format(fv);
     $("r-paid").textContent = mxn.format(paid);
     $("r-gr").textContent = mxn.format(growth);
-    $("r-share").textContent = Math.round(growth / fv * 100) + "% es rendimiento";
+    $("r-share").textContent = Math.round(growth / fv * 100) + "% del total es rendimiento";
     last = { monthly: month, rate: RATE, years: years };
     CreskoChart.render($("growth"), last);
   }
@@ -542,10 +531,10 @@ footer p { max-width: 70em; }
   document.querySelectorAll(".seg button").forEach(function (b) {
     b.addEventListener("click", function () {
       document.querySelectorAll(".seg button").forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
-      RATE = +b.getAttribute("data-rate");
-      var p = Math.round(RATE * 100) + "% anual";
+      RATE = PORTS[b.getAttribute("data-p")].mu;
+      var p = pctTxt(RATE) + " anual";
       $("prof-out").textContent = p;
-      $("r-fine").textContent = "Ejemplo hipotético con " + p + " compuesto cada mes, antes de comisiones e impuestos. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.";
+      $("r-fine").textContent = "Ejemplo hipotético con " + p + " compuesto cada mes, antes de comisiones e impuestos. Supuestos: deuda gubernamental 7%, acciones México 11% y acciones globales 12% anual. Una inversión puede bajar de valor; los rendimientos pasados no garantizan los futuros.";
       calc();
     });
   });

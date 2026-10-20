@@ -196,11 +196,6 @@ p { margin: 0; }
 .log .k-procesador { color: #FFD08A; }
 .log .k-evento { color: #E3B8FF; }
 .log .k-socio { color: #7FE3F0; }
-.mix { display: grid; gap: 6px; }
-.mix-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--line); }
-.mix-bar i { display: block; height: 100%; }
-.mix-leg { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.75rem; color: var(--muted); }
-.mix-leg span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; background: var(--c); }
 .port { border: 1.5px solid var(--line); background: var(--surface); border-radius: 16px; padding: 14px; text-align: left; display: grid; gap: 8px; width: 100%; }
 .port[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .port-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }

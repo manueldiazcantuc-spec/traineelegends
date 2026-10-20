@@ -25,7 +25,7 @@ assert.equal(buy(s, 100, "2026-11-01T10:00:00").fee, 5);
 
 // Pausa y tarjeta desvinculada
 s = state({ paused: true });
-assert.equal(buy(s, 100).reason, "Apartados en pausa");
+assert.equal(buy(s, 100).reason, "Inversión en pausa");
 s = state(); s.card.status = "desvinculada";
 assert.equal(buy(s, 100).status, "omitido");
 
