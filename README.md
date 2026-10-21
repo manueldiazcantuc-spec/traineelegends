@@ -26,3 +26,8 @@ node tests/engine.test.js
 ```
 
 Cifras de la calculadora y del fondo: hipotéticas. No es asesoría de inversión.
+
+## Deploy en Netlify
+
+El sitio es estático. `netlify.toml` publica la raíz del repositorio y corre las pruebas del motor antes de publicar.
+En Netlify: **Add new site → Import an existing project → GitHub →** este repositorio. No hay que configurar nada más.
