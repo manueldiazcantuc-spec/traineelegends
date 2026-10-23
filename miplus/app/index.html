@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MI+ · MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="page">
+  <header class="bar-top">
+    <div class="brand"><span class="mark">MI<b>+</b></span><small>MVP · Ruta A: tarjeta digital + MI vinculada</small></div>
+    <button class="link" id="reset" type="button">Reiniciar demo</button>
+  </header>
+
+  <div class="stage">
+    <div class="phone" aria-label="App MI+">
+      <div class="status"><span>9:41</span><span>MI+</span></div>
+      <main class="screen" id="screen"></main>
+      <nav class="tabs" id="tabs" aria-label="Secciones" hidden></nav>
+      <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+
+    <aside class="panel" aria-label="Simulador">
+      <section class="card">
+        <p class="eyebrow">Simulador</p>
+        <h2>El mundo real, en botones</h2>
+        <p class="muted">Cada acción imita a un tercero: la terminal del comercio, la caja de la tienda, el torniquete del Metro, el banco y el programa social.</p>
+        <div id="sim" class="sim"><p class="muted small">Primero crea tu cuenta en el teléfono.</p></div>
+      </section>
+      <section class="card">
+        <p class="eyebrow">Bitácora del backend</p>
+        <ol class="log" id="log" aria-live="polite"></ol>
+      </section>
+    </aside>
+  </div>
+</div>
+<script src="../core/engine.js"></script>
+<script src="../core/providers.js"></script>
+<script src="../core/service.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

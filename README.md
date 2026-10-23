@@ -26,3 +26,8 @@ node tests/engine.test.js
 ```
 
 Cifras de la calculadora y del fondo: hipotéticas. No es asesoría de inversión.
+
+## MI+
+
+`miplus/` es un proyecto aparte: el caso práctico y el MVP para convertir la tarjeta MI del Metro de la CDMX en una
+tarjeta multiusos de circuito abierto. Ver `miplus/README.md`.
